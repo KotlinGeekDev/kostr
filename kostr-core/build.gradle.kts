@@ -1,14 +1,18 @@
 plugins {
-   kotlin("jvm")
     `java-library`
+   id("kotlin")
+
 }
 
 group = "kt.nostr"
 version = "1.0-SNAPSHOT"
 
-repositories {
-    mavenCentral()
-}
+
+
+//java {
+//    sourceCompatibility = JavaVersion.VERSION_1_8
+//    targetCompatibility = JavaVersion.VERSION_1_8
+//}
 
 dependencies {
     //  implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.1")

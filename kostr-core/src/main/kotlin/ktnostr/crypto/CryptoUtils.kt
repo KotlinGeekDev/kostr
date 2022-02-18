@@ -12,19 +12,11 @@ import javax.security.auth.Destroyable
 //TODO: Add signing and verification(to be tuned for events.)
 class CryptoUtils internal constructor(): Destroyable{
 
-    private val context: Secp256k1 = Secp256k1.get()
-
-    companion object {
-
-        @JvmStatic
-        fun get(): CryptoUtils = CryptoUtils()
-
-    }
-
 
 
     fun generatePrivateKey(): ByteArray {
 
+        val context: Secp256k1 = Secp256k1.get()
         if (context == null) throw Secp256k1Exception("Secp256k1 provider failed to initialize.")
         val secretKey = ByteArray(32)
         val pseudoRandomBytes = SecureRandom()
@@ -34,6 +26,7 @@ class CryptoUtils internal constructor(): Destroyable{
     }
 
     fun getPublicKey(privateKey: ByteArray): ByteArray {
+        val context: Secp256k1 = Secp256k1.get()
         if (privateKey == null) throw Error("There is no private key provided!")// just a check
         return context.pubkeyCreate(privateKey).drop(1).take(32).toByteArray()
     }
