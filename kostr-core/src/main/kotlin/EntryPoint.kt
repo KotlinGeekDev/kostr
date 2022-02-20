@@ -7,7 +7,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
-@Suppress("NewApi")
+
 fun main() {
 
 val kotlinStringHash = CryptoUtils().contentHash("Kotlin")
@@ -26,12 +26,6 @@ println("Formatted datetime: ${currentTime.atZone(ZoneId.systemDefault())
 
 fun ByteArray.toHexString() = Hex.encode(this)
 
-@Suppress("NewApi")
-fun currentUnixTimeStampFromInstant(): Long  = Instant.now().epochSecond
-fun currentSystemUnixTimeStamp(): Long = System.currentTimeMillis().div(1000L)
 
-@Suppress("NewApi")
-fun formattedDateTime(timestamp: Long): String {
-    return Instant.ofEpochSecond(timestamp).atZone(ZoneId.systemDefault())
-        .format(DateTimeFormatter.ofPattern("uuuu MMM d hh:mm a"))
-}
+
+
