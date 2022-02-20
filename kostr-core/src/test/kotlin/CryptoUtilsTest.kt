@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class CryptoUtilsTest {
 
 
-    private val testContext = CryptoUtils.get()
+    private val testContext = CryptoUtils()
 
     @Test
     fun `check that it correctly creates pubkeys`(){
