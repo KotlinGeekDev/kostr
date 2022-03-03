@@ -56,6 +56,18 @@ class CryptoUtils internal constructor(): Destroyable {
         return contentSignature
     }
 
+    @Throws(Error::class)
+    fun verifyContentSignature(signature: ByteArray, publicKey: ByteArray, content: ByteArray): Boolean {
+        if (signature ==null) throw Error("No signature provided!")
+        if (publicKey == null) throw Error("No public key/invalid public key provided!")
+        if (content == null) throw Error("No content/invalid content provided!")
+        val verificationContext = Secp256k1.get()
+        val verificationStatus = verificationContext.verifySchnorr(signature, content, publicKey)
+        verificationContext.cleanup()
+        return verificationStatus
+
+    }
+
     companion object {
 
         @JvmStatic
