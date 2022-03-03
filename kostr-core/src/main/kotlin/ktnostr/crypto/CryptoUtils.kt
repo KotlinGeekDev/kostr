@@ -52,6 +52,7 @@ class CryptoUtils internal constructor(): Destroyable {
         val freshRandomBytes = ByteArray(32)
         SecureRandom().nextBytes(freshRandomBytes)
         val contentSignature = signingContext.signSchnorr(contentInBytes, privateKey, freshRandomBytes)
+        signingContext.cleanup()
         return contentSignature
     }
 
