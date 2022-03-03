@@ -44,7 +44,16 @@ class CryptoUtils internal constructor(): Destroyable {
             .digest(content.toByteArray())
     }
 
-    
+    @Throws(Error::class)
+    fun signContent(privateKey: ByteArray, content: String): ByteArray {
+        if (privateKey == null) throw Error("Invalid private key!")
+        val signingContext = Secp256k1.get()
+        val contentInBytes = Hex.decode(content)
+        val freshRandomBytes = ByteArray(32)
+        SecureRandom().nextBytes(freshRandomBytes)
+        val contentSignature = signingContext.signSchnorr(contentInBytes, privateKey, freshRandomBytes)
+        return contentSignature
+    }
 
     companion object {
 
