@@ -1,16 +1,14 @@
 
-import fr.acinq.secp256k1.Hex
 import ktnostr.crypto.CryptoUtils
-import ktnostr.crypto.contentHash
+import ktnostr.crypto.toHexString
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 
-
 fun main() {
 
-val kotlinStringHash = CryptoUtils().contentHash("Kotlin")
+val kotlinStringHash = CryptoUtils.get().contentHash("Kotlin")
 println("SHA256 of Kotlin: ${kotlinStringHash.toHexString()}")
 if(kotlinStringHash.toHexString() == "c78f6c97923e81a2f04f09c5e87b69e085c1e47066a1136b5f590bfde696e2eb")
 println("Hashes match!") else println("Hashes do not match!")
@@ -24,7 +22,7 @@ println("Formatted datetime: ${currentTime.atZone(ZoneId.systemDefault())
 }
 
 
-fun ByteArray.toHexString() = Hex.encode(this)
+
 
 
 

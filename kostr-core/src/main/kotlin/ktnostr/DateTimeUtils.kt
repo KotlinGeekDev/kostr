@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 /**
 * The function takes a Unix timestamp in and returns
 * a human-readable date and time.
-* @param timestamp - The Unix timestamp
+* @param timestamp The Unix timestamp as a Long
 * @return A human-readable date and time, as a string.
  */
 

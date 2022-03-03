@@ -1,10 +1,7 @@
 package kt.nostr.kostr_android
 
-import ktnostr.crypto.CryptoUtils
-import ktnostr.crypto.contentHash
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
