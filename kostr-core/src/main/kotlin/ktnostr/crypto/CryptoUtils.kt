@@ -10,7 +10,6 @@ import java.security.SecureRandom
 import javax.security.auth.Destroyable
 
 //Class containing all the cryptographic helpers for Nostr
-//TODO: Add signing and verification(to be tuned for events.)
 class CryptoUtils internal constructor(): Destroyable {
 
 
@@ -24,9 +23,16 @@ class CryptoUtils internal constructor(): Destroyable {
         return secretKey
     }
 
+    /**
+     * Generates(creates) a 32-byte public key from the provided private key.
+     * @param privateKey the 32-byte private key, provided as a byte
+     * array.
+     *
+     * @return the public key, as a byte array.
+     */
     fun getPublicKey(privateKey: ByteArray): ByteArray {
-        val context: Secp256k1 = Secp256k1.get()
         if (privateKey == null) throw Error("There is no private key provided!")// just a check
+        val context: Secp256k1 = Secp256k1.get()
         if (!context.secKeyVerify(privateKey)) throw Error("Invalid private key!")
         val pubKey = context.pubkeyCreate(privateKey).drop(1).take(32).toByteArray()
         context.cleanup()
@@ -44,19 +50,36 @@ class CryptoUtils internal constructor(): Destroyable {
             .digest(content.toByteArray())
     }
 
+    /**
+     * The function signs the content provided to it, and
+     * returns the 64-byte schnorr signature of the content.
+     * @param privateKey the private key used for signing, provided
+     * as a byte array.
+     * @param content the content to be signed, provided as a
+     * byte array.
+     *
+     * @return the 64-byte signature, as a byte array.
+     */
     @Throws(Error::class)
-    fun signContent(privateKey: ByteArray, content: String): ByteArray {
-        if (privateKey == null) throw Error("Invalid private key!")
+    fun signContent(privateKey: ByteArray, content: ByteArray): ByteArray {
+        if (privateKey == null) throw Error("There is no private key provided!")
         val signingContext = Secp256k1.get()
-        val contentInBytes = Hex.decode(content)
         val freshRandomBytes = ByteArray(32)
         SecureRandom().nextBytes(freshRandomBytes)
-        val contentSignature = signingContext.signSchnorr(contentInBytes, privateKey, freshRandomBytes)
+        val contentSignature = signingContext.signSchnorr(content, privateKey, freshRandomBytes)
         signingContext.cleanup()
         return contentSignature
     }
 
-    @Throws(Error::class)
+    /**
+     * The function verifies the provided 64-byte signature.
+     * @param signature the signature to provide, as a byte array.
+     * @param publicKey the 32-byte public key to provide, as a byte array.
+     * @param content the signed content to provide, as a byte array.
+     *
+     * @return the validity of the signature, as a boolean.
+     */
+    @Throws(Secp256k1Exception::class)
     fun verifyContentSignature(signature: ByteArray, publicKey: ByteArray, content: ByteArray): Boolean {
         if (signature ==null) throw Error("No signature provided!")
         if (publicKey == null) throw Error("No public key/invalid public key provided!")
