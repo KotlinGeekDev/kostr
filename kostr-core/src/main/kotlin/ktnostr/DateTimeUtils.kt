@@ -1,3 +1,4 @@
+@file:JvmName("DateTimeUtils")
 package ktnostr
 
 import java.time.Instant

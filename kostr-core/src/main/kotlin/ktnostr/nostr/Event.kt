@@ -1,3 +1,4 @@
+@file:JvmName("Events")
 package ktnostr.nostr
 
 import com.fasterxml.jackson.annotation.JsonProperty

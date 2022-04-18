@@ -1,3 +1,4 @@
+@file:JvmName("EventExt")
 package ktnostr.nostr
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

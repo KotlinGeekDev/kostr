@@ -1,3 +1,4 @@
+@file:JvmName("Tag")
 package ktnostr.nostr
 
 /**
