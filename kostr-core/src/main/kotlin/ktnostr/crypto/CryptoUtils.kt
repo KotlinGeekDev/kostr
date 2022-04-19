@@ -1,4 +1,4 @@
-@file:JvmName("CryptoUtils")
+//@file:JvmName("CryptoUtils")
 
 package ktnostr.crypto
 
