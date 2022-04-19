@@ -100,3 +100,19 @@ internal fun rawEventJson0(pubkey: String, timeStamp: Long, eventKind: Int,
 //    return jsonEventRaw
 //}
 
+
+/**
+ * This object represents the various event kinds
+ * currently used on Nostr. Not all are supported, though.
+ */
+object EventKind {
+    const val METADATA = 0
+    const val TEXT_NOTE = 1
+    const val RELAY_RECOMMENDATION = 2
+    const val CONTACT_LIST = 3
+    const val ENCRYPTED_DM = 4
+    const val MARK_FOR_DELETION = 5
+
+}
+
+
