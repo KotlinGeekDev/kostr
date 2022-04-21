@@ -66,13 +66,13 @@ fun Event.isValid(): Boolean {
 }
 
 fun Event.serialize(): String {
-    if (!this.isValid()) throw Exception("Generated event is not valid")
+    if (!this.isValid()) throw EventValidationError("Generated event is not valid")
     val serializedEvent = eventMapper.writeValueAsString(this)
     return serializedEvent
 }
 
 fun deserializedEvent(eventJson: String): Event {
     val deserializedEvent = eventMapper.readValue<Event>(eventJson)
-    if (!deserializedEvent.isValid()) throw Error("The event is invalid.")
+    if (!deserializedEvent.isValid()) throw EventValidationError("The event is invalid.")
     return deserializedEvent
 }
