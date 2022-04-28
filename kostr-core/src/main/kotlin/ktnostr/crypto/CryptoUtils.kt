@@ -31,9 +31,9 @@ class CryptoUtils internal constructor(): Destroyable {
      * @return the public key, as a byte array.
      */
     fun getPublicKey(privateKey: ByteArray): ByteArray {
-        if (privateKey == null) throw Exception("There is no private key provided!")// just a check
+        if (privateKey == null) throw Error("There is no private key provided!")// just a check
         val context: Secp256k1 = Secp256k1.get()
-        if (!context.secKeyVerify(privateKey)) throw Exception("Invalid private key!")
+        if (!context.secKeyVerify(privateKey)) throw Error("Invalid private key!")
         val pubKey = context.pubkeyCreate(privateKey).drop(1).take(32).toByteArray()
         context.cleanup()
         return pubKey
@@ -81,9 +81,9 @@ class CryptoUtils internal constructor(): Destroyable {
      */
     @Throws(Secp256k1Exception::class)
     fun verifyContentSignature(signature: ByteArray, publicKey: ByteArray, content: ByteArray): Boolean {
-        if (signature ==null) throw Exception("No signature provided!")
-        if (publicKey == null) throw Exception("No public key/invalid public key provided!")
-        if (content == null) throw Exception("No content/invalid content provided!")
+        if (signature ==null) throw Error("No signature provided!")
+        if (publicKey == null) throw Error("No public key/invalid public key provided!")
+        if (content == null) throw Error("No content/invalid content provided!")
         val verificationContext = Secp256k1.get()
         val verificationStatus = verificationContext.verifySchnorr(signature, content, publicKey)
         verificationContext.cleanup()

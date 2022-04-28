@@ -37,7 +37,6 @@ android {
 dependencies {
 
     implementation project(":kostr-core")
-    implementation 'com.tinder.scarlet:lifecycle-android:0.1.12'
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
     implementation 'androidx.appcompat:appcompat:1.4.1'
     testImplementation 'junit:junit:4.13.2'
