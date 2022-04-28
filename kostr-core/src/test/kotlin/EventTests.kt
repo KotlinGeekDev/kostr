@@ -17,8 +17,9 @@ class EventTests {
                 "1649108200", "1", "Testing some event")
         val rawEventInJson = rawEventJson0(rawEventData[0], rawEventData[1].toLong(), rawEventData[2].toInt(),
                             someTags, rawEventData[3])
+        val correctRawJson = "[0,\"8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f\",1649108200,1,[[\"#p\",\"42365g3ghgf7gg15hj64jk\"]],\"Testing some event\"]"
         println(rawEventInJson)
-        assert(true)
+        assert(rawEventInJson == correctRawJson)
 
     }
 
