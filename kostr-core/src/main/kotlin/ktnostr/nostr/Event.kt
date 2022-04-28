@@ -111,13 +111,9 @@ object EventKind {
     const val RELAY_RECOMMENDATION = 2
     const val CONTACT_LIST = 3
     const val ENCRYPTED_DM = 4
-    const val MARK_FOR_DELETION = 5
+    const val MARKED_FOR_DELETION = 5
 
+    @JvmStatic
+    fun values(): List<Int> = listOf(METADATA, TEXT_NOTE, RELAY_RECOMMENDATION,
+                        CONTACT_LIST, ENCRYPTED_DM, MARKED_FOR_DELETION)
 }
-
-sealed class NostrException : RuntimeException {
-    constructor(): super()
-    constructor(message: String?): super(message)
-}
-
-class EventValidationError(override val message: String): NostrException(message)

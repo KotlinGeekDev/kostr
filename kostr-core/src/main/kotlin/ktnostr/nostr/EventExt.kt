@@ -6,7 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import fr.acinq.secp256k1.Hex
 import ktnostr.crypto.CryptoUtils
 
-val eventMapper = jacksonObjectMapper()
+internal val eventMapper = jacksonObjectMapper()
 
 /**
  * Keeping this function below for legacy purposes.
