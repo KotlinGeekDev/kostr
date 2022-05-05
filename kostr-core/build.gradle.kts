@@ -5,9 +5,6 @@ plugins {
 
 }
 
-group = "kt.nostr"
-version = "1.0-SNAPSHOT"
-
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
 }
@@ -30,6 +27,7 @@ dependencies {
    // implementation("com.squareup.moshi:moshi:1.13.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.6.4")
     testRuntimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.6.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
