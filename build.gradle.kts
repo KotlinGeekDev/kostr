@@ -1,4 +1,9 @@
+plugins {
+    `maven-publish`
+}
+
 buildscript {
+
     repositories {
         google()
         mavenCentral()
@@ -10,6 +15,7 @@ buildscript {
         //classpath("")
 
     }
+
 }
 
 
@@ -19,8 +25,26 @@ allprojects {
         mavenCentral()
     }
 
+    group = "com.github.AnonymousGeekDev"
+    version = "0.1-pre-alpha-2"
 
-    group = "tk.anonymousgeek"
-    version = "1.0-SNAPSHOT"
 }
+
+subprojects {
+    apply(plugin = "maven-publish")
+
+
+    publishing {
+        publications {
+            create<MavenPublication>("maven"){
+                groupId = project.group.toString()
+                artifactId = project.name
+                version = project.version.toString()
+                //from(project.components["src"])
+            }
+        }
+    }
+
+}
+
 
