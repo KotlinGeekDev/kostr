@@ -5,9 +5,10 @@ plugins {
 }
 
 android {
-    compileSdk 29
+    compileSdk 31
 
     defaultConfig {
+
         minSdk 21
         targetSdk 31
         versionCode 1
@@ -19,6 +20,8 @@ android {
 
     buildTypes {
         release {
+            aarMetadata {
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -31,13 +34,14 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    compileSdkVersion 29
+    compileSdkVersion 31
     buildToolsVersion '31.0.0'
+
 }
 
 dependencies {
 
-    implementation project(":kostr-core")
+    api project(":kostr-core")
     implementation 'com.tinder.scarlet:lifecycle-android:0.1.12'
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.1.5"
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -51,6 +55,9 @@ afterEvaluate {
         publications {
             release(MavenPublication){
                 from components.release
+                groupId = 'com.github.AnonymousGeekDev'
+                artifactId = 'kostr-android'
+                version = '0.1-pre-alpha-4'
             }
         }
     }

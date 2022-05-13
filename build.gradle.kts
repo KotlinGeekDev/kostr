@@ -1,6 +1,6 @@
-plugins {
-    `maven-publish`
-}
+//plugins {
+//    `maven-publish`
+//}
 
 buildscript {
 
@@ -23,28 +23,29 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven(url = "https://jitpack.io")
     }
 
     group = "com.github.AnonymousGeekDev"
-    version = "0.1-pre-alpha-2"
+    version = "0.1-pre-alpha-4"
 
 }
 
-subprojects {
-    apply(plugin = "maven-publish")
-
-
-    publishing {
-        publications {
-            create<MavenPublication>("maven"){
-                groupId = project.group.toString()
-                artifactId = project.name
-                version = project.version.toString()
-                //from(project.components["src"])
-            }
-        }
-    }
-
-}
+//subprojects {
+//    apply(plugin = "maven-publish")
+//
+//
+//    publishing {
+//        publications {
+//            create<MavenPublication>("maven"){
+//                groupId = project.group.toString()
+//                artifactId = project.name
+//                version = project.version.toString()
+//                //from(project.components["src"])
+//            }
+//        }
+//    }
+//
+//}
 
 
