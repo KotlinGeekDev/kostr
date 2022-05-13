@@ -51,7 +51,7 @@ publishing {
             groupId = project.parent?.group.toString()
             artifactId = project.name
             version = project.parent?.version.toString()
-            artifact(tasks.kotlinSourcesJar)
+            //artifact(tasks.kotlinSourcesJar)
             from(components["kotlin"])
         }
     }
