@@ -44,11 +44,6 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-tasks.create<org.gradle.jvm.tasks.Jar>("libSourcesJar"){
-    classifier = "sources"
-    from(sourceSets.main)
-}
-
 
 publishing {
     publications {
@@ -56,7 +51,6 @@ publishing {
             groupId = project.parent?.group.toString()
             artifactId = project.name
             version = project.parent?.version.toString()
-            artifact("libSourcesJar")
             artifact(tasks.kotlinSourcesJar)
             from(components["kotlin"])
         }
