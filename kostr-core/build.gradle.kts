@@ -17,11 +17,14 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 
 dependencies {
 
-    implementation("com.tinder.scarlet:scarlet:0.1.12")
-    implementation("com.tinder.scarlet:websocket-okhttp:0.1.12")
-    implementation("com.tinder.scarlet:stream-adapter-built-in:0.1.12")
-    implementation("com.tinder.scarlet:message-adapter-jackson:0.1.12")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${properties["version.kotlin"]}")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:${properties["version.kotlin"]}")
+    implementation("com.tinder.scarlet:scarlet:${properties["version.scarlet"]}")
+    implementation("com.tinder.scarlet:websocket-okhttp:${properties["version.scarlet"]}")
+    implementation("com.tinder.scarlet:stream-adapter-built-in:${properties["version.scarlet"]}")
+    implementation("com.tinder.scarlet:message-adapter-jackson:${properties["version.scarlet"]}")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${properties["version.jackson"]}")
       implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
     //  implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-common:0.6.1")
     //implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-extract:0.6.2")
@@ -30,7 +33,7 @@ dependencies {
 
     implementation(kotlin("stdlib"))
    // implementation("com.squareup.moshi:moshi:1.13.0")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${properties["version.jackson"]}")
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.6.4")
     testRuntimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.6.4")

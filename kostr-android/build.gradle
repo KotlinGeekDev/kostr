@@ -39,6 +39,11 @@ android {
 
 }
 
+//java {
+//    withSourcesJar()
+//    withJavadocJar()
+//}
+
 dependencies {
 
     api project(":kostr-core")
