@@ -9,7 +9,7 @@ class EventTests {
     @Test
     fun `it generates the correct raw event json for obtaining the eventId`(){
         val someTags = listOf(
-            Tag("#p", "42365g3ghgf7gg15hj64jk")
+            Tag("#p", "42365g3ghgf7gg15hj64jk", null)
             //Triple("#e", "546454ghgfnfg56456fgngg", "wss://relayer.fiatjaf.com")
         ).toStringList()
         println("Test 1:")

@@ -12,8 +12,11 @@ package ktnostr.nostr
  * @param description The tag's contents, as a string
  * @param recommendedRelayUrl (optional) A recommended relay url, as a string
  */
+//@JsonInclude(value = JsonInclude.Include.NON_NULL)
+//@JsonFormat(shape = JsonFormat.Shape.ARRAY)
+//---To uncomment these when Issue #563 on jackson-module-kotlin is solved.
 data class Tag(val identifier: String, val description: String,
-          val recommendedRelayUrl: String? = null)
+               val recommendedRelayUrl: String? = null)
 
 /**
  * Transforms a list of tags to a list of string arrays.
