@@ -23,11 +23,11 @@ data class Event( val id: String,
              val pubkey: String,
              @JsonProperty("created_at") val creationDate: Long,
              @JsonProperty("kind") val eventKind: Int,
-             val tags: List<List<String>>,
+             val tags: List<Tag>,
              val content: String,
              @JsonProperty("sig") val eventSignature: String): java.io.Serializable
 
-fun generateEvent(eventKind: Int, tags: List<List<String>>, content: String, privateKey: String): Event {
+fun generateEvent(eventKind: Int, tags: List<Tag>, content: String, privateKey: String): Event {
     val pubkey = CryptoUtils.get().getPublicKey(Hex.decode(privateKey))
     val pubkeyString = pubkey.toHexString()
     val currentUnixTime = currentSystemUnixTimeStamp()
@@ -43,7 +43,7 @@ fun generateEvent(eventKind: Int, tags: List<List<String>>, content: String, pri
 
 fun getEventId(
     pubkey: String, timeStamp: Long, eventKind: Int,
-    tags: List<List<String>>, content: String
+    tags: List<Tag>, content: String
 ): String {
     val jsonToHash = rawEventJson0(pubkey, timeStamp, eventKind, tags, content)
 
@@ -52,7 +52,7 @@ fun getEventId(
 }
 
 internal fun rawEventJson0(pubkey: String, timeStamp: Long, eventKind: Int,
-                           tags: List<List<String>>, content: String): String {
+                           tags: List<Tag>, content: String): String {
     val rawEventForSerialization = listOf(0, pubkey, timeStamp, eventKind, tags, content)
 
     val serializedRawEvent = eventMapper.writeValueAsString(rawEventForSerialization)
