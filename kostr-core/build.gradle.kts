@@ -28,7 +28,7 @@ dependencies {
     implementation("com.tinder.scarlet:message-adapter-jackson:${scarletVersion}")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-      implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
+    implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
     //  implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-common:0.6.1")
     //implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-extract:0.6.2")
     //implementation("org.junit.jupiter:junit-jupiter:5.8.2")

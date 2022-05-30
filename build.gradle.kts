@@ -31,21 +31,4 @@ allprojects {
 
 }
 
-//subprojects {
-//    apply(plugin = "maven-publish")
-//
-//
-//    publishing {
-//        publications {
-//            create<MavenPublication>("maven"){
-//                groupId = project.group.toString()
-//                artifactId = project.name
-//                version = project.version.toString()
-//                //from(project.components["src"])
-//            }
-//        }
-//    }
-//
-//}
-
 
