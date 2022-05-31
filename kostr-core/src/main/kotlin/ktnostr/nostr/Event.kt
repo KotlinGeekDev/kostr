@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import fr.acinq.secp256k1.Hex
 import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toHexString
-import ktnostr.currentSystemUnixTimeStamp
+import ktnostr.currentSystemTimestamp
 
 /**
  * The Event class representing the Nostr Event.
@@ -30,7 +30,7 @@ data class Event( val id: String,
 fun generateEvent(eventKind: Int, tags: List<Tag>, content: String, privateKey: String): Event {
     val pubkey = CryptoUtils.get().getPublicKey(Hex.decode(privateKey))
     val pubkeyString = pubkey.toHexString()
-    val currentUnixTime = currentSystemUnixTimeStamp()
+    val currentUnixTime = currentSystemTimestamp()
     val eventID = getEventId(pubkeyString, currentUnixTime, eventKind, tags, content)
 
     val eventIDRaw = Hex.decode(eventID)
@@ -140,4 +140,6 @@ object EventKind {
     @JvmStatic
     fun values(): List<Int> = listOf(METADATA, TEXT_NOTE, RELAY_RECOMMENDATION,
                         CONTACT_LIST, ENCRYPTED_DM, MARKED_FOR_DELETION)
+
+
 }
