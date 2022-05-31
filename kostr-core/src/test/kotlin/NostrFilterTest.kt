@@ -1,4 +1,5 @@
 
+import ktnostr.currentSystemTimestamp
 import ktnostr.nostr.EventKind
 import ktnostr.nostr.NostrFilter
 import org.junit.Test
@@ -12,11 +13,10 @@ class NostrFilterTest {
     private val listOfKinds = listOf(EventKind.TEXT_NOTE)
     private val referencedEventIds = listOf("ref_event_id_1", "ref_event_id_2")
     private val referencedProfiles = listOf("ref_pubkey_1")
-    private val upperTimeLimit = 1653822739.toLong()
+    private val upperTimeLimit = currentSystemTimestamp()
     private val lowerTimeLimit = upperTimeLimit - 24 * 60 * 60
     private val maxEventLimit = 25
-    val filter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
-        referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit)
+
 
     // For the second filter
     private val secondEventIdList = listOf("event_id_4", "event_id_5")
@@ -30,6 +30,11 @@ class NostrFilterTest {
 
     @Test
     fun `it serializes the nostr filter correctly`(){
+        val currentTimestamp = 1653822739L
+        val previousTimestamp = currentTimestamp - 24 * 60 * 60
+        val filter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
+            referencedProfiles, previousTimestamp, currentTimestamp, maxEventLimit)
+
         val correctFilterJson = """{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}"""
 
         val filterJson = testEventMapper.writeValueAsString(filter)
@@ -37,6 +42,24 @@ class NostrFilterTest {
         println("Generated filterJson: \n $filterJson")
         assertEquals(filterJson, correctFilterJson)
 
+    }
+
+    @Test
+    fun `the timestamp for the filter is correctly generated`(){
+        val filter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
+            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit)
+
+        val cloneFilter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
+            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit)
+
+        val filterJson = testEventMapper.writeValueAsString(filter)
+        val cloneFilterJson = testEventMapper.writeValueAsString(cloneFilter)
+
+        println(filter)
+        println(cloneFilter)
+        println("FilterJson: $filterJson")
+        println("Clone filterJson: $cloneFilterJson")
+        assertEquals(filterJson, cloneFilterJson)
     }
 
 }

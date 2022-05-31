@@ -24,5 +24,5 @@ fun formattedDateTime(timestamp: Long): String {
  * Could there be hidden differences?
  */
 
-fun currentUnixTimeStampFromInstant(): Long  = Instant.now().epochSecond
-fun currentSystemUnixTimeStamp(): Long = System.currentTimeMillis().div(1000L)
+fun currentTimestampFromInstant(): Long  = Instant.now().epochSecond
+fun currentSystemTimestamp(): Long = System.currentTimeMillis().div(1000L)
