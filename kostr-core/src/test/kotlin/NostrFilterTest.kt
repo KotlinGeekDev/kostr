@@ -19,14 +19,14 @@ class NostrFilterTest {
 
 
     // For the second filter
-    private val secondEventIdList = listOf("event_id_4", "event_id_5")
-    private val secondAuthorList = listOf("author_pubkey_3", "author_pubkey_4")
-    private val secondKindList = listOf(EventKind.METADATA, EventKind.RELAY_RECOMMENDATION)
-    private val referencedEventIdList = listOf("ref_event_id_3", "ref_event_id_4")
-    private val referencedProfileList = listOf("ref_pubkey_2", "ref_pubkey_3", "ref_pubkey_4")
-    private val secondMaxEventLimit = 10
-    val filter_2 = NostrFilter(secondEventIdList, secondAuthorList, secondKindList, referencedEventIdList,
-        referencedProfileList, lowerTimeLimit, upperTimeLimit, secondMaxEventLimit)
+//    private val secondEventIdList = listOf("event_id_4", "event_id_5")
+//    private val secondAuthorList = listOf("author_pubkey_3", "author_pubkey_4")
+//    private val secondKindList = listOf(EventKind.METADATA, EventKind.RELAY_RECOMMENDATION)
+//    private val referencedEventIdList = listOf("ref_event_id_3", "ref_event_id_4")
+//    private val referencedProfileList = listOf("ref_pubkey_2", "ref_pubkey_3", "ref_pubkey_4")
+//    private val secondMaxEventLimit = 10
+//    val filter_2 = NostrFilter(secondEventIdList, secondAuthorList, secondKindList, referencedEventIdList,
+//        referencedProfileList, lowerTimeLimit, upperTimeLimit, secondMaxEventLimit)
 
     @Test
     fun `it serializes the nostr filter correctly`(){
