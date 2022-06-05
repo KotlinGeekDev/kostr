@@ -28,8 +28,10 @@ sealed class RelayMessage
  * @see ktnostr.nostr.deserializedEvent
  */
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-data class RelayEventMessage(val messageType: String = "EVENT", val subscriptionId: String,
-                             val eventJson: String): RelayMessage()
+data class RelayEventMessage(
+    val messageType: String = "EVENT", val subscriptionId: String,
+    val eventJson: String
+) : RelayMessage()
 
 /**
  * The model representing the case when the relay returns a message different from the normal response.
@@ -37,17 +39,21 @@ data class RelayEventMessage(val messageType: String = "EVENT", val subscription
  * This could be due to the relay not having the data we need, or something else.
  */
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
-data class RelayNotice(val messageType: String,
-                       val message: String): RelayMessage()
+data class RelayNotice(
+    val messageType: String,
+    val message: String
+) : RelayMessage()
 
-private class RelayMessageConverter: JsonDeserializer<RelayMessage>() {
+private class RelayMessageConverter : JsonDeserializer<RelayMessage>() {
 
     override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): RelayMessage {
         val messageTree = p?.readValueAsTree<ArrayNode>()
-        if (messageTree?.size()!! > 3 || messageTree.size() < 2) {throw Exception("This message type is not supported.")}
+        if (messageTree?.size()!! > 3 || messageTree.size() < 2) {
+            throw Exception("This message type is not supported.")
+        }
 
 
-        return if (messageTree.size() == 3){
+        return if (messageTree.size() == 3) {
             val messageType = messageTree[0].asText()
             val subscriptionId = messageTree[1].asText()
             val content = if (messageTree[2].isContainerNode) messageTree[2].toString() else ""

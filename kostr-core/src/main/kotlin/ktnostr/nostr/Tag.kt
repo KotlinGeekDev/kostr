@@ -4,12 +4,10 @@ package ktnostr.nostr
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.ObjectCodec
-import com.fasterxml.jackson.core.TreeNode
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.node.ArrayNode
-
 
 /**
  * The model representing the event tag. The event tag carries
@@ -27,15 +25,19 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 //---To uncomment these when Issue #563 on jackson-module-kotlin is solved.
 @JsonSerialize(using = Tag.TagSerializer::class)
 @JsonDeserialize(using = Tag.TagDeserializer::class)
-data class Tag(val identifier: String, val description: String,
-               val recommendedRelayUrl: String? = null) {
+data class Tag(
+    val identifier: String, val description: String,
+    val recommendedRelayUrl: String? = null
+) {
+
     class TagSerializer : JsonSerializer<Tag>() {
         override fun serialize(value: Tag?, gen: JsonGenerator, serializers: SerializerProvider?) {
             gen.writeStartArray()
             gen.writeString(value?.identifier)
             gen.writeString(value?.description)
-            if (value?.recommendedRelayUrl != null){ gen.writeString(value.recommendedRelayUrl)}
-
+            if (value?.recommendedRelayUrl != null) {
+                gen.writeString(value.recommendedRelayUrl)
+            }
             gen.writeEndArray()
         }
     }
@@ -48,7 +50,6 @@ data class Tag(val identifier: String, val description: String,
         }
     }
 }
-
 
 //----Kept for legacy purposes, or when serialization above does not work----
 ///**

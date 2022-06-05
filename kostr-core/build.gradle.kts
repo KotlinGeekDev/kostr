@@ -1,10 +1,10 @@
- val scarletVersion = "0.1.12"
- val kotlinVersion = "1.5.31"
- val jacksonVersion = "2.13.3"
+val scarletVersion = "0.1.12"
+val kotlinVersion = "1.5.31"
+val jacksonVersion = "2.13.3"
 
 plugins {
     `java-library`
-   kotlin("jvm") version "1.5.31"
+    kotlin("jvm") version "1.5.31"
     `maven-publish`
 
 }
@@ -35,7 +35,7 @@ dependencies {
     // implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.6.1")
 
     implementation(kotlin("stdlib"))
-   // implementation("com.squareup.moshi:moshi:1.13.0")
+    // implementation("com.squareup.moshi:moshi:1.13.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
     implementation("org.jetbrains.kotlin:kotlin-test-junit:${kotlinVersion}")
     testImplementation("junit:junit:4.13.2")
@@ -59,7 +59,7 @@ tasks.test {
 
 publishing {
     publications {
-        create<MavenPublication>("maven"){
+        create<MavenPublication>("maven") {
             groupId = project.parent?.group.toString()
             artifactId = project.name
             version = project.parent?.version.toString()
