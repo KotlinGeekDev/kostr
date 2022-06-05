@@ -1,4 +1,5 @@
 @file:JvmName("EventExt")
+
 package ktnostr.nostr
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -49,16 +50,20 @@ internal val eventMapper = jacksonObjectMapper()
 //}
 
 fun Event.isValid(): Boolean {
-    val eventId = getEventId(this.pubkey, this.creationDate, this.eventKind,
-                this.tags, this.content)
-    if (eventId != this.id){
+    val eventId = getEventId(
+        this.pubkey, this.creationDate, this.eventKind,
+        this.tags, this.content
+    )
+    if (eventId != this.id) {
         println("The event id is invalid.")
         return false
     }
-    val signatureValidity = CryptoUtils.get().verifyContentSignature(
+    val signatureValidity = CryptoUtils.verifyContentSignature(
         Hex.decode(this.eventSignature),
-        Hex.decode(this.pubkey), Hex.decode(eventId))
-    if (!signatureValidity){
+        Hex.decode(this.pubkey),
+        Hex.decode(eventId)
+    )
+    if (!signatureValidity) {
         println("The event signature is invalid.\n Please check the pubkey, or content.")
         return false
     }
@@ -67,8 +72,7 @@ fun Event.isValid(): Boolean {
 
 fun Event.serialize(): String {
     if (!this.isValid()) throw EventValidationError("Generated event is not valid")
-    val serializedEvent = eventMapper.writeValueAsString(this)
-    return serializedEvent
+    return eventMapper.writeValueAsString(this)
 }
 
 fun deserializedEvent(eventJson: String): Event {

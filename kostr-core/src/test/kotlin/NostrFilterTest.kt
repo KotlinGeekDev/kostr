@@ -1,4 +1,3 @@
-
 import ktnostr.currentSystemTimestamp
 import ktnostr.nostr.EventKind
 import ktnostr.nostr.NostrFilter
@@ -29,13 +28,16 @@ class NostrFilterTest {
 //        referencedProfileList, lowerTimeLimit, upperTimeLimit, secondMaxEventLimit)
 
     @Test
-    fun `it serializes the nostr filter correctly`(){
+    fun `it serializes the nostr filter correctly`() {
         val currentTimestamp = 1653822739L
         val previousTimestamp = currentTimestamp - 24 * 60 * 60
-        val filter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
-            referencedProfiles, previousTimestamp, currentTimestamp, maxEventLimit)
+        val filter = NostrFilter(
+            eventIdList, authorList, listOfKinds, referencedEventIds,
+            referencedProfiles, previousTimestamp, currentTimestamp, maxEventLimit
+        )
 
-        val correctFilterJson = """{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}"""
+        val correctFilterJson =
+            """{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}"""
 
         val filterJson = testEventMapper.writeValueAsString(filter)
         println("Correct filterJson: \n $correctFilterJson")
@@ -45,12 +47,16 @@ class NostrFilterTest {
     }
 
     @Test
-    fun `the timestamp for the filter is correctly generated`(){
-        val filter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
-            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit)
+    fun `the timestamp for the filter is correctly generated`() {
+        val filter = NostrFilter(
+            eventIdList, authorList, listOfKinds, referencedEventIds,
+            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit
+        )
 
-        val cloneFilter = NostrFilter(eventIdList, authorList, listOfKinds, referencedEventIds,
-            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit)
+        val cloneFilter = NostrFilter(
+            eventIdList, authorList, listOfKinds, referencedEventIds,
+            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit
+        )
 
         val filterJson = testEventMapper.writeValueAsString(filter)
         val cloneFilterJson = testEventMapper.writeValueAsString(cloneFilter)

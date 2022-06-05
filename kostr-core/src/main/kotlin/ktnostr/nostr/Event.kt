@@ -1,4 +1,5 @@
 @file:JvmName("Events")
+
 package ktnostr.nostr
 
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -19,22 +20,24 @@ import ktnostr.currentSystemTimestamp
  * @param content The event's content, as a string
  * @param eventSignature The event's signature, as a 64-byte string
  */
-data class Event( val id: String,
-             val pubkey: String,
-             @JsonProperty("created_at") val creationDate: Long,
-             @JsonProperty("kind") val eventKind: Int,
-             val tags: List<Tag>,
-             val content: String,
-             @JsonProperty("sig") val eventSignature: String): java.io.Serializable
+data class Event(
+    val id: String,
+    val pubkey: String,
+    @JsonProperty("created_at") val creationDate: Long,
+    @JsonProperty("kind") val eventKind: Int,
+    val tags: List<Tag>,
+    val content: String,
+    @JsonProperty("sig") val eventSignature: String
+) : java.io.Serializable
 
 fun generateEvent(eventKind: Int, tags: List<Tag>, content: String, privateKey: String): Event {
-    val pubkey = CryptoUtils.get().getPublicKey(Hex.decode(privateKey))
+    val pubkey = CryptoUtils.getPublicKey(Hex.decode(privateKey))
     val pubkeyString = pubkey.toHexString()
     val currentUnixTime = currentSystemTimestamp()
     val eventID = getEventId(pubkeyString, currentUnixTime, eventKind, tags, content)
 
     val eventIDRaw = Hex.decode(eventID)
-    val signature = CryptoUtils.get().signContent(Hex.decode(privateKey), eventIDRaw)
+    val signature = CryptoUtils.signContent(Hex.decode(privateKey), eventIDRaw)
     val signatureString = signature.toHexString()
 
     return Event(eventID, pubkeyString, currentUnixTime, eventKind, tags, content, signatureString)
@@ -47,12 +50,14 @@ fun getEventId(
 ): String {
     val jsonToHash = rawEventJson0(pubkey, timeStamp, eventKind, tags, content)
 
-    val jsonHash = CryptoUtils.get().contentHash(jsonToHash)
+    val jsonHash = CryptoUtils.contentHash(jsonToHash)
     return jsonHash.toHexString()
 }
 
-internal fun rawEventJson0(pubkey: String, timeStamp: Long, eventKind: Int,
-                           tags: List<Tag>, content: String): String {
+internal fun rawEventJson0(
+    pubkey: String, timeStamp: Long, eventKind: Int,
+    tags: List<Tag>, content: String
+): String {
     val rawEventForSerialization = listOf(0, pubkey, timeStamp, eventKind, tags, content)
 
     val serializedRawEvent = eventMapper.writeValueAsString(rawEventForSerialization)
@@ -138,8 +143,10 @@ object EventKind {
     const val MARKED_FOR_DELETION = 5
 
     @JvmStatic
-    fun values(): List<Int> = listOf(METADATA, TEXT_NOTE, RELAY_RECOMMENDATION,
-                        CONTACT_LIST, ENCRYPTED_DM, MARKED_FOR_DELETION)
+    fun values(): List<Int> = listOf(
+        METADATA, TEXT_NOTE, RELAY_RECOMMENDATION,
+        CONTACT_LIST, ENCRYPTED_DM, MARKED_FOR_DELETION
+    )
 
 
 }

@@ -10,9 +10,7 @@ import java.security.SecureRandom
 import javax.security.auth.Destroyable
 
 //Class containing all the cryptographic helpers for Nostr
-class CryptoUtils internal constructor(): Destroyable {
-
-
+object CryptoUtils {
     fun generatePrivateKey(): ByteArray {
         val context: Secp256k1 = Secp256k1.get()
         if (context == null) throw Secp256k1Exception("Secp256k1 provider failed to initialize.")
@@ -80,8 +78,12 @@ class CryptoUtils internal constructor(): Destroyable {
      * @return the validity of the signature, as a boolean.
      */
     @Throws(Secp256k1Exception::class)
-    fun verifyContentSignature(signature: ByteArray, publicKey: ByteArray, content: ByteArray): Boolean {
-        if (signature ==null) throw Exception("No signature provided!")
+    fun verifyContentSignature(
+        signature: ByteArray,
+        publicKey: ByteArray,
+        content: ByteArray
+    ): Boolean {
+        if (signature == null) throw Exception("No signature provided!")
         if (publicKey == null) throw Exception("No public key/invalid public key provided!")
         if (content == null) throw Exception("No content/invalid content provided!")
         val verificationContext = Secp256k1.get()
@@ -90,18 +92,6 @@ class CryptoUtils internal constructor(): Destroyable {
         return verificationStatus
 
     }
-
-    companion object {
-
-        @JvmStatic
-        fun get(): CryptoUtils {
-            return CryptoUtils()
-        }
-
-    }
-
-
-
 }
 
 
