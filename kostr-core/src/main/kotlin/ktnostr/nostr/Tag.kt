@@ -21,15 +21,19 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 //@JsonFormat(shape = JsonFormat.Shape.ARRAY)
 //---To uncomment these when Issue #563 on jackson-module-kotlin is solved.
 @JsonSerialize(using = TagSerializer::class)
-data class Tag(val identifier: String, val description: String,
-               val recommendedRelayUrl: String? = null)
+data class Tag(
+    val identifier: String, val description: String,
+    val recommendedRelayUrl: String? = null
+)
 
 class TagSerializer : JsonSerializer<Tag>() {
     override fun serialize(value: Tag?, gen: JsonGenerator?, serializers: SerializerProvider?) {
         gen?.writeStartArray()
         gen?.writeString(value?.identifier)
         gen?.writeString(value?.description)
-        if (value?.recommendedRelayUrl != null){ gen?.writeString(value.recommendedRelayUrl)}
+        if (value?.recommendedRelayUrl != null) {
+            gen?.writeString(value.recommendedRelayUrl)
+        }
 
         gen?.writeEndArray()
     }

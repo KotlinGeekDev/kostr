@@ -1,4 +1,3 @@
-
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import ktnostr.nostr.Tag
 import ktnostr.nostr.rawEventJson0
@@ -6,27 +5,33 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 internal val testEventMapper = jacksonObjectMapper()
+
 class EventTests {
 
     @Test
-    fun `it generates the correct raw event json for obtaining the eventId`(){
+    fun `it generates the correct raw event json for obtaining the eventId`() {
         val someTags = listOf(
             Tag("#p", "42365g3ghgf7gg15hj64jk", null)
             //Triple("#e", "546454ghgfnfg56456fgngg", "wss://relayer.fiatjaf.com")
         )
         println("Test 1:")
-        val rawEventData = listOf("8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f",
-                "1649108200", "1", "Testing some event")
-        val rawEventInJson = rawEventJson0(rawEventData[0], rawEventData[1].toLong(), rawEventData[2].toInt(),
-                            someTags, rawEventData[3])
-        val correctRawJson = "[0,\"8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f\",1649108200,1,[[\"#p\",\"42365g3ghgf7gg15hj64jk\"]],\"Testing some event\"]"
+        val rawEventData = listOf(
+            "8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f",
+            "1649108200", "1", "Testing some event"
+        )
+        val rawEventInJson = rawEventJson0(
+            rawEventData[0], rawEventData[1].toLong(), rawEventData[2].toInt(),
+            someTags, rawEventData[3]
+        )
+        val correctRawJson =
+            "[0,\"8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f\",1649108200,1,[[\"#p\",\"42365g3ghgf7gg15hj64jk\"]],\"Testing some event\"]"
         println(rawEventInJson)
         assertEquals(rawEventInJson, correctRawJson)
 
     }
 
     @Test
-    fun `it generates correct events with multiple tags`(){
+    fun `it generates correct events with multiple tags`() {
 //        val eventTestTag = listOf(
 //            Tag("p", "13adc511de7e1cfcf1c6b7f6365fb5a03442d7bcacf565ea57fa7770912c023d"),
 //        )
