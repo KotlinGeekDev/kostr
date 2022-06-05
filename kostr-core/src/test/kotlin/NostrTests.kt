@@ -1,6 +1,7 @@
 
 import ktnostr.nostr.*
 import org.junit.jupiter.api.Test
+import org.junit.Assert.assertEquals
 
 class NostrTests {
 
@@ -2024,7 +2025,6 @@ class NostrTests {
         println(event)
         println("Correct Event:")
         println(correctlyParsedEvent)
-        assert(event == correctlyParsedEvent)
+        assertEquals(correctlyParsedEvent, event)
     }
-
 }
