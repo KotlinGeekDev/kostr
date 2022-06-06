@@ -1,5 +1,6 @@
+package ktnostr.crypto
+
 import fr.acinq.secp256k1.Hex
-import ktnostr.crypto.CryptoUtils
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -10,7 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.*
 
 @RunWith(Parameterized::class)
-internal class SchnorrSigTest {
+class SchnorrSigTest {
     data class TV(
         val id: Int,
         val secKey: ByteArray?,
@@ -74,7 +75,7 @@ internal class SchnorrSigTest {
     }
 }
 
-internal class SchnorrKeysTest {
+class SchnorrKeysTest {
     @Test
     fun testKeyPair() {
         val secKey = "dca4f4bf2883e4502200d7831ad891ace8c895709e9f09c9f9692632ae36c482".uppercase(Locale.US)
@@ -84,7 +85,7 @@ internal class SchnorrKeysTest {
 
     @Test
     fun testSecKey() {
-        (0..100000).forEach {
+        repeat(100) {
             val secKey = CryptoUtils.generatePrivateKey()
             val secKeyHex = Hex.encode(secKey)
             val pubKey = CryptoUtils.getPublicKey(secKey)

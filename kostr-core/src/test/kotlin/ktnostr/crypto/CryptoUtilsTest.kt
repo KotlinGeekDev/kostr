@@ -1,6 +1,6 @@
+package ktnostr.crypto
+
 import fr.acinq.secp256k1.Hex
-import ktnostr.crypto.CryptoUtils
-import ktnostr.crypto.toHexString
 import org.junit.Test
 import org.junit.Assert.assertEquals
 

@@ -7,13 +7,11 @@ import fr.acinq.secp256k1.Secp256k1
 import fr.acinq.secp256k1.Secp256k1Exception
 import java.security.MessageDigest
 import java.security.SecureRandom
-import javax.security.auth.Destroyable
 
 //Class containing all the cryptographic helpers for Nostr
 object CryptoUtils {
     fun generatePrivateKey(): ByteArray {
         val context: Secp256k1 = Secp256k1.get()
-        if (context == null) throw Secp256k1Exception("Secp256k1 provider failed to initialize.")
         val secretKey = ByteArray(32)
         val pseudoRandomBytes = SecureRandom()
         pseudoRandomBytes.nextBytes(secretKey)
@@ -29,7 +27,6 @@ object CryptoUtils {
      * @return the public key, as a byte array.
      */
     fun getPublicKey(privateKey: ByteArray): ByteArray {
-        if (privateKey == null) throw Exception("There is no private key provided!")// just a check
         val context: Secp256k1 = Secp256k1.get()
         if (!context.secKeyVerify(privateKey)) throw Exception("Invalid private key!")
         val pubKey = context.pubkeyCreate(privateKey).drop(1).take(32).toByteArray()
@@ -60,7 +57,6 @@ object CryptoUtils {
      */
     @Throws(Error::class)
     fun signContent(privateKey: ByteArray, content: ByteArray): ByteArray {
-        if (privateKey == null) throw Error("There is no private key provided!")
         val signingContext = Secp256k1.get()
         val freshRandomBytes = ByteArray(32)
         SecureRandom().nextBytes(freshRandomBytes)
@@ -83,16 +79,11 @@ object CryptoUtils {
         publicKey: ByteArray,
         content: ByteArray
     ): Boolean {
-        if (signature == null) throw Exception("No signature provided!")
-        if (publicKey == null) throw Exception("No public key/invalid public key provided!")
-        if (content == null) throw Exception("No content/invalid content provided!")
         val verificationContext = Secp256k1.get()
         val verificationStatus = verificationContext.verifySchnorr(signature, content, publicKey)
         verificationContext.cleanup()
         return verificationStatus
-
     }
 }
-
 
 fun ByteArray.toHexString() = Hex.encode(this)

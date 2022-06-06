@@ -37,9 +37,7 @@ class FilterListSerializer : JsonSerializer<List<NostrFilter>>() {
         serializers: SerializerProvider?
     ) {
         value?.forEach { filter ->
-            if (gen != null) {
-                gen.writeObject(filter)
-            }
+            gen?.writeObject(filter)
         }
     }
 
