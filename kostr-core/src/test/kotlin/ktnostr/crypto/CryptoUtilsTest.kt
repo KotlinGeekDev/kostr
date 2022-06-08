@@ -1,9 +1,8 @@
 package ktnostr.crypto
 
 import fr.acinq.secp256k1.Hex
-import org.junit.Test
-import org.junit.Assert.assertEquals
-
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 class CryptoUtilsTest {
     @Test
@@ -13,7 +12,7 @@ class CryptoUtilsTest {
         val secKeyBytes = Hex.decode(secKeyHex)
         val actualPubKeyBytes = CryptoUtils.getPublicKey(secKeyBytes)
         val actualPubKeyHex = Hex.encode(actualPubKeyBytes)
-        assertEquals("PubKeys do not match!", pubKeyHex, actualPubKeyHex)
+        assertEquals(pubKeyHex, actualPubKeyHex, "PubKeys do not match!")
     }
 
     @Test
@@ -21,6 +20,6 @@ class CryptoUtilsTest {
         val content = "Kotlin"
         val hashHex = "c78f6c97923e81a2f04f09c5e87b69e085c1e47066a1136b5f590bfde696e2eb"
         val actualHashHex = CryptoUtils.contentHash(content).toHexString()
-        assertEquals("Hashes do not match!", hashHex, actualHashHex)
+        assertEquals(hashHex, actualHashHex, "Hashes do not match!")
     }
 }
