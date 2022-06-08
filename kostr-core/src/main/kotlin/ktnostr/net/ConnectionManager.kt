@@ -1,6 +1,3 @@
 package ktnostr.net
 
-class ConnectionManager {
-
-
-}
+class ConnectionManager
