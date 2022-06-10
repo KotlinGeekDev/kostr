@@ -2,9 +2,12 @@
 package ktnostr.nostr
 
 import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.ObjectCodec
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.node.ArrayNode
 
 /**
  * The model representing the event tag. The event tag carries
@@ -20,24 +23,37 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 //@JsonInclude(value = JsonInclude.Include.NON_NULL)
 //@JsonFormat(shape = JsonFormat.Shape.ARRAY)
 //---To uncomment these when Issue #563 on jackson-module-kotlin is solved.
-@JsonSerialize(using = TagSerializer::class)
+@JsonSerialize(using = Tag.TagSerializer::class)
+@JsonDeserialize(using = Tag.TagDeserializer::class)
 data class Tag(
     val identifier: String, val description: String,
     val recommendedRelayUrl: String? = null
-)
+) {
 
-class TagSerializer : JsonSerializer<Tag>() {
-    override fun serialize(value: Tag?, gen: JsonGenerator?, serializers: SerializerProvider?) {
-        gen?.writeStartArray()
-        gen?.writeString(value?.identifier)
-        gen?.writeString(value?.description)
-        if (value?.recommendedRelayUrl != null) {
-            gen?.writeString(value.recommendedRelayUrl)
+    class TagSerializer : JsonSerializer<Tag>() {
+        override fun serialize(value: Tag?, gen: JsonGenerator, serializers: SerializerProvider?) {
+            gen.writeStartArray()
+            gen.writeString(value?.identifier)
+            gen.writeString(value?.description)
+            if (value?.recommendedRelayUrl != null) {
+                gen.writeString(value.recommendedRelayUrl)
+            }
+            gen.writeEndArray()
         }
-
-        gen?.writeEndArray()
     }
 
+    class TagDeserializer : JsonDeserializer<Tag>() {
+        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Tag {
+            val codec: ObjectCodec = p.codec
+            val kv = (codec.readTree(p) as ArrayNode).map { (it as JsonNode).asText() }
+            val listSize = kv.size
+            return when {
+                listSize > 3 || listSize < 2 -> throw java.lang.Exception("Incorrect tag format.")
+                listSize == 3 -> Tag(kv[0], kv[1], kv[2])
+                else -> Tag(kv[0], kv[1])
+            }
+        }
+    }
 }
 
 //----Kept for legacy purposes, or when serialization above does not work----
