@@ -46,7 +46,12 @@ data class Tag(
         override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Tag {
             val codec: ObjectCodec = p.codec
             val kv = (codec.readTree(p) as ArrayNode).map { (it as JsonNode).asText() }
-            return Tag(kv[0], kv[1])
+            val listSize = kv.size
+            return when {
+                listSize > 3 || listSize < 2 -> throw java.lang.Exception("Incorrect tag format.")
+                listSize == 3 -> Tag(kv[0], kv[1], kv[2])
+                else -> Tag(kv[0], kv[1])
+            }
         }
     }
 }
