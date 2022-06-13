@@ -68,4 +68,16 @@ class NostrFilterTest {
         assertEquals(filterJson, cloneFilterJson)
     }
 
+    @Test
+    fun `another test for correct serialization`(){
+        val currentTimestamp = 1653822739L
+        val previousTimestamp = currentTimestamp - 24 * 60 * 60
+     val textEventFilter = NostrFilter(null, null, listOf(1),
+         null, null, previousTimestamp, currentTimestamp, 30)
+        val filterJson = testEventMapper.writeValueAsString(textEventFilter)
+        val correctRequestJson = """{"kinds":[1],"since":1653736339,"until":1653822739,"limit":30}"""
+        println(filterJson)
+        assertEquals(correctRequestJson, filterJson)
+    }
+
 }
