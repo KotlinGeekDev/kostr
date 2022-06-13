@@ -8,8 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import ktnostr.nostr.Event
 import ktnostr.nostr.NostrFilter
 
-
-
 sealed class ClientMessage(open val messageType: String)
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
@@ -39,11 +37,8 @@ class FilterListSerializer : JsonSerializer<List<NostrFilter>>() {
         serializers: SerializerProvider?
     ) {
         value?.forEach { filter ->
-            if (gen != null) {
-                gen.writeObject(filter)
-            } else {
-                println("Null filter detected.")
-            }
+            gen?.writeObject(filter)
         }
     }
+
 }

@@ -1,8 +1,7 @@
+package ktnostr.crypto
 import fr.acinq.secp256k1.Hex
-import ktnostr.crypto.CryptoUtils
-import ktnostr.crypto.toHexString
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 
 class CryptoUtilsTest {

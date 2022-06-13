@@ -1,10 +1,12 @@
+package ktnostr.nostr
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import ktnostr.currentSystemTimestamp
-import ktnostr.nostr.EventKind
-import ktnostr.nostr.NostrFilter
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class NostrFilterTest {
+    val testEventMapper = jacksonObjectMapper()
 
     // For the first filter
     private val eventIdList = listOf("event_id_1", "event_id_2", "event_id_3")
