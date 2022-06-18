@@ -1,8 +1,8 @@
 @file:JvmName("EventUtils")
 package ktnostr.nostr
 
-import fr.acinq.secp256k1.Hex
 import ktnostr.crypto.CryptoUtils
+import ktnostr.crypto.toBytes
 import ktnostr.crypto.toHexString
 import ktnostr.currentSystemTimestamp
 
@@ -11,17 +11,15 @@ object Events {
     fun generateEvent(eventKind: Int,
                       tags: List<Tag>,
                       content: String,
-                      privateKey: String): Event {
-        val pubkey = CryptoUtils.getPublicKey(Hex.decode(privateKey))
-        val pubkeyString = pubkey.toHexString()
+                      privateKeyHex: String, publicKeyHex: String): Event {
         val currentUnixTime = currentSystemTimestamp()
-        val eventID = getEventId(pubkeyString, currentUnixTime, eventKind, tags, content)
+        val eventID = getEventId(publicKeyHex, currentUnixTime, eventKind, tags, content)
 
-        val eventIDRaw = Hex.decode(eventID)
-        val signature = CryptoUtils.signContent(Hex.decode(privateKey), eventIDRaw)
+        val eventIDRaw = eventID.toBytes()
+        val signature = CryptoUtils.signContent(privateKeyHex.toBytes(), eventIDRaw)
         val signatureString = signature.toHexString()
 
-        return Event(eventID, pubkeyString, currentUnixTime, eventKind, tags, content, signatureString)
+        return Event(eventID, publicKeyHex, currentUnixTime, eventKind, tags, content, signatureString)
     }
 
     @JvmStatic
@@ -30,14 +28,14 @@ object Events {
                       tags: List<Tag> = emptyList(),
                       kind: Int = EventKind.METADATA, content: String): Event {
 
-        return generateEvent(kind, tags, content, privkey)
+        return generateEvent(kind, tags, content, privkey, pubkey)
     }
 
     @JvmStatic
     fun textEvent(privkey: String, pubkey: String,
                   tags: List<Tag> = emptyList(),
                   kind: Int = EventKind.TEXT_NOTE, content: String): Event {
-        return generateEvent(kind, tags, content, privkey)
+        return generateEvent(kind, tags, content, privkey, pubkey)
     }
 
     @JvmStatic
@@ -48,7 +46,7 @@ object Events {
         if (!content.startsWith("wss") || !content.startsWith("ws")) {
             throw EventValidationError("Content $content is not a valid relay URL.")
             }
-        return generateEvent(kind, tags, content, privkey)
+        return generateEvent(kind, tags, content, privkey, pubkey)
     }
 
 }
