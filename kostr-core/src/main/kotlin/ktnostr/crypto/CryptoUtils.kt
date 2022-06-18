@@ -87,3 +87,4 @@ object CryptoUtils {
 }
 
 fun ByteArray.toHexString() = Hex.encode(this)
+fun String.toBytes() = Hex.decode(this)
