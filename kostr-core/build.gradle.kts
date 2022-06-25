@@ -18,8 +18,9 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.5.31")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.31")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.5.31")
     implementation("com.tinder.scarlet:scarlet:${scarletVersion}")
     implementation("com.tinder.scarlet:websocket-okhttp:${scarletVersion}")
     implementation("com.tinder.scarlet:stream-adapter-built-in:${scarletVersion}")
@@ -34,10 +35,11 @@ dependencies {
     //implementation("org.junit.jupiter:junit-jupiter:5.8.2")
     // implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.6.1")
 
-    implementation(kotlin("stdlib", "1.5.31"))
+
     // implementation("com.squareup.moshi:moshi:1.13.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
-    implementation("org.jetbrains.kotlin:kotlin-test-junit:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-test-junit:1.5.31")
+
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
