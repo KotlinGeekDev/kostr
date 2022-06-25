@@ -12,9 +12,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 /**
  * The model representing the event tag. The event tag carries
  * information such as what identifies the tag('p', 'e', etc), the tag's
- * content, or description(a referenced pubkey, event, etc), and
- * optionally a recommended relay url, which you can add to the list
- * of relays you already have.
+ * content, or description(a referenced pubkey, event, etc),
+ * a recommended relay url(optional), which you can add to the list
+ * of relays you already have, and a petname or username(optional),
+ * when a tag contains an identity's alias(or username).
  *
  * @param identifier The tag identifier, as a string
  * @param description The tag's contents, as a string
@@ -27,7 +28,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 @JsonDeserialize(using = Tag.TagDeserializer::class)
 data class Tag(
     val identifier: String, val description: String,
-    val recommendedRelayUrl: String? = null
+    val recommendedRelayUrl: String? = null,
+    val petname: String? = null
 ) {
 
     class TagSerializer : JsonSerializer<Tag>() {
@@ -37,6 +39,9 @@ data class Tag(
             gen.writeString(value?.description)
             if (value?.recommendedRelayUrl != null) {
                 gen.writeString(value.recommendedRelayUrl)
+            }
+            if (value?.petname != null) {
+                gen.writeString(value.petname)
             }
             gen.writeEndArray()
         }
@@ -48,7 +53,8 @@ data class Tag(
             val kv = (codec.readTree(p) as ArrayNode).map { (it as JsonNode).asText() }
             val listSize = kv.size
             return when {
-                listSize > 3 || listSize < 2 -> throw java.lang.Exception("Incorrect tag format.")
+                listSize > 4 || listSize < 2 -> throw java.lang.Exception("Incorrect tag format.")
+                listSize == 4 -> Tag(kv[0], kv[1], kv[2], kv[3])
                 listSize == 3 -> Tag(kv[0], kv[1], kv[2])
                 else -> Tag(kv[0], kv[1])
             }
