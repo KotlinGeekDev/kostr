@@ -10,12 +10,11 @@ import java.security.SecureRandom
 
 //Class containing all the cryptographic helpers for Nostr
 object CryptoUtils {
+
     fun generatePrivateKey(): ByteArray {
-        val context: Secp256k1 = Secp256k1.get()
         val secretKey = ByteArray(32)
         val pseudoRandomBytes = SecureRandom()
         pseudoRandomBytes.nextBytes(secretKey)
-        context.cleanup()
         return secretKey
     }
 
@@ -27,10 +26,9 @@ object CryptoUtils {
      * @return the public key, as a byte array.
      */
     fun getPublicKey(privateKey: ByteArray): ByteArray {
-        val context: Secp256k1 = Secp256k1.get()
-        if (!context.secKeyVerify(privateKey)) throw Exception("Invalid private key!")
-        val pubKey = context.pubkeyCreate(privateKey).drop(1).take(32).toByteArray()
-        context.cleanup()
+        if (!Secp256k1.secKeyVerify(privateKey)) throw Exception("Invalid private key!")
+        val pubKey = Secp256k1.pubkeyCreate(privateKey).drop(1).take(32).toByteArray()
+        //context.cleanup()
         return pubKey
     }
 
@@ -57,11 +55,9 @@ object CryptoUtils {
      */
     @Throws(Error::class)
     fun signContent(privateKey: ByteArray, content: ByteArray): ByteArray {
-        val signingContext = Secp256k1.get()
         val freshRandomBytes = ByteArray(32)
         SecureRandom().nextBytes(freshRandomBytes)
-        val contentSignature = signingContext.signSchnorr(content, privateKey, freshRandomBytes)
-        signingContext.cleanup()
+        val contentSignature = Secp256k1.signSchnorr(content, privateKey, freshRandomBytes)
         return contentSignature
     }
 
@@ -79,11 +75,11 @@ object CryptoUtils {
         publicKey: ByteArray,
         content: ByteArray
     ): Boolean {
-        val verificationContext = Secp256k1.get()
-        val verificationStatus = verificationContext.verifySchnorr(signature, content, publicKey)
-        verificationContext.cleanup()
+        val verificationStatus = Secp256k1.verifySchnorr(signature, content, publicKey)
+
         return verificationStatus
     }
+
 }
 
 fun ByteArray.toHexString() = Hex.encode(this)
