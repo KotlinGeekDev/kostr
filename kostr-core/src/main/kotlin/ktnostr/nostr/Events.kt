@@ -1,6 +1,7 @@
 @file:JvmName("EventUtils")
 package ktnostr.nostr
 
+import fr.acinq.secp256k1.Secp256k1
 import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toBytes
 import ktnostr.crypto.toHexString
@@ -9,26 +10,33 @@ import ktnostr.currentSystemTimestamp
 object Events {
 
     internal fun generateEvent(eventKind: Int,
-                      tags: List<Tag>,
-                      content: String,
-                      privateKeyHex: String, publicKeyHex: String): Event {
-        val currentUnixTime = currentSystemTimestamp()
-        val eventID = getEventId(publicKeyHex, currentUnixTime, eventKind, tags, content)
+                               tags: List<Tag>,
+                               content: String,
+                               privateKeyHex: String,
+                               publicKeyHex: String, timeStamp: Long = currentSystemTimestamp()): Event {
+        //val currentUnixTime = currentSystemTimestamp()
+        val privKey = privateKeyHex.toBytes()
+        val genPubKey = Secp256k1.pubkeyCreate(privKey).drop(1).take(32).toByteArray()
+        val genPubKeyHex = genPubKey.toHexString()
+        if (genPubKeyHex != publicKeyHex)
+            throw EventValidationError("The pubkeys don't match. Expected :$publicKeyHex \n Generated:$genPubKeyHex ")
+        val eventID = getEventId(publicKeyHex, timeStamp, eventKind, tags, content)
 
         val eventIDRaw = eventID.toBytes()
         val signature = CryptoUtils.signContent(privateKeyHex.toBytes(), eventIDRaw)
         val signatureString = signature.toHexString()
 
-        return Event(eventID, publicKeyHex, currentUnixTime, eventKind, tags, content, signatureString)
+        return Event(eventID, publicKeyHex, timeStamp, eventKind, tags, content, signatureString)
     }
 
     @JvmStatic
     fun MetadataEvent(privkey: String,
                       pubkey: String,
+                      timeStamp: Long = currentSystemTimestamp(),
                       tags: List<Tag> = emptyList(),
                       kind: Int = EventKind.METADATA, profile: String): Event {
 
-        return generateEvent(kind, tags, profile, privkey, pubkey)
+        return generateEvent(kind, tags, profile, privkey, pubkey, timeStamp)
     }
 
     @JvmStatic
