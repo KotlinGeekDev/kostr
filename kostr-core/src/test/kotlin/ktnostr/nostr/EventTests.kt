@@ -35,13 +35,13 @@ class EventTests {
 //    }
 
     @Test
-    fun `testing the equivalence of keys during event generation`(){
+    fun `testing the equivalence of event ids during event generation`(){
         val secKeyHex = "6ba903b7888191180a0959a6d286b9d0719d33a47395c519ba107470412d2069"
         val pubKeyHex = "8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f"
 
-        val profileEvent = Events.MetadataEvent(secKeyHex, pubKeyHex, profile = "Name.")
+        val profileEvent = Events.MetadataEvent(secKeyHex, pubKeyHex, profile = "Name.", timeStamp = 1640839235)
         val correspondingEvent = Events.generateEvent(EventKind.METADATA, emptyList(),
-            "Name.", secKeyHex, pubKeyHex)
+            "Name.", secKeyHex, pubKeyHex, timeStamp = 1640839235)
         println("Profile Ev: $profileEvent")
         println("Corr. Ev: $correspondingEvent")
         assertEquals(profileEvent.id, correspondingEvent.id)
