@@ -27,7 +27,7 @@ allprojects {
     }
 
     group = "com.github.AnonymousGeekDev"
-    version = "0.1-pre-alpha-4"
+    version = "0.1-pre-alpha-8"
 
 }
 
