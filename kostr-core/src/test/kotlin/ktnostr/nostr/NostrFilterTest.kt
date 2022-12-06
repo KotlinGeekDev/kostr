@@ -1,10 +1,12 @@
+package ktnostr.nostr
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import ktnostr.currentSystemTimestamp
-import ktnostr.nostr.EventKind
-import ktnostr.nostr.NostrFilter
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class NostrFilterTest {
+    val testEventMapper = jacksonObjectMapper()
 
     // For the first filter
     private val eventIdList = listOf("event_id_1", "event_id_2", "event_id_3")
@@ -66,6 +68,18 @@ class NostrFilterTest {
         println("FilterJson: $filterJson")
         println("Clone filterJson: $cloneFilterJson")
         assertEquals(filterJson, cloneFilterJson)
+    }
+
+    @Test
+    fun `another test for correct serialization`(){
+        val currentTimestamp = 1653822739L
+        val previousTimestamp = currentTimestamp - 24 * 60 * 60
+     val textEventFilter = NostrFilter(null, null, listOf(1),
+         null, null, previousTimestamp, currentTimestamp, 30)
+        val filterJson = testEventMapper.writeValueAsString(textEventFilter)
+        val correctRequestJson = """{"kinds":[1],"since":1653736339,"until":1653822739,"limit":30}"""
+        println(filterJson)
+        assertEquals(correctRequestJson, filterJson)
     }
 
 }

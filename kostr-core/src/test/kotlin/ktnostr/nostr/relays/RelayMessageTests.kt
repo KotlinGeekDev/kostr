@@ -1,10 +1,11 @@
+package ktnostr.nostr.relays
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import ktnostr.nostr.relays.RelayEventMessage
-import ktnostr.nostr.relays.RelayMessage
-import ktnostr.nostr.relays.RelayNotice
 import org.junit.jupiter.api.Test
 
 class RelayMessageTests {
+    val testEventMapper = jacksonObjectMapper()
 
     @Test
     fun `the relay message is correctly parsed to a notice`() {
@@ -19,7 +20,6 @@ class RelayMessageTests {
         println(relayNotice)
         println(correctRelayNotice)
         assert(relayNotice == correctRelayNotice)
-
     }
 
     @Test
@@ -38,5 +38,4 @@ class RelayMessageTests {
         println(correctRelayMessage)
         assert(relayMessage == correctRelayMessage)
     }
-
 }

@@ -1,6 +1,8 @@
+package ktnostr.nostr.client
+
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import ktnostr.nostr.EventKind
 import ktnostr.nostr.NostrFilter
-import ktnostr.nostr.client.RequestMessage
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized;
@@ -12,6 +14,7 @@ data class TV(val nostrFilters: List<NostrFilter>, val nostrFilterJson: String)
 
 @RunWith(Parameterized::class)
 class ClientMessageTests {
+    val testEventMapper = jacksonObjectMapper()
     @Parameter
     lateinit var tv: TV
 

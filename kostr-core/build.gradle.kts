@@ -6,7 +6,6 @@ plugins {
     `java-library`
     kotlin("jvm") version "1.5.31"
     `maven-publish`
-
 }
 
 java {
@@ -19,7 +18,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 }
 
 dependencies {
-
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
     implementation("com.tinder.scarlet:scarlet:${scarletVersion}")
@@ -38,22 +36,23 @@ dependencies {
     // implementation("com.squareup.moshi:moshi:1.13.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
     implementation("org.jetbrains.kotlin:kotlin-test-junit:${kotlinVersion}")
-    testImplementation("junit:junit:4.13.2")
-
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
     testImplementation("org.assertj:assertj-core:3.22.0")
     runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.6.4")
     testRuntimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.6.4")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
-
 }
 
 
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
 
 

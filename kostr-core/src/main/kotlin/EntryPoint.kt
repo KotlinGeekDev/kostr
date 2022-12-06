@@ -1,3 +1,4 @@
+import fr.acinq.secp256k1.Hex
 import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toHexString
 import java.time.Instant
@@ -20,6 +21,18 @@ fun main() {
                 .format(DateTimeFormatter.ofPattern("uuuu MMM d hh:mm a"))
         }"
     )
+    println(" ")
+    testPubkeyGeneration()
+}
+
+fun testPubkeyGeneration(){
+    val secKeyHex = "6ba903b7888191180a0959a6d286b9d0719d33a47395c519ba107470412d2069"
+    val pubKeyHex = "8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f"
+    val secKeyBytes = Hex.decode(secKeyHex)
+    val actualPubKeyBytes = CryptoUtils.getPublicKey(secKeyBytes)
+    val actualPubKeyHex = Hex.encode(actualPubKeyBytes)
+    println("Correct pubkey: $pubKeyHex \n")
+    println("Generated pubkey: $actualPubKeyHex")
 }
 
 
