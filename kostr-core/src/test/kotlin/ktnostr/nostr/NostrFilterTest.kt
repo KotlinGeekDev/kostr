@@ -6,7 +6,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class NostrFilterTest {
-    val testEventMapper = jacksonObjectMapper()
+    val nostrFilterEventMapper = jacksonObjectMapper()
 
     // For the first filter
     private val eventIdList = listOf("event_id_1", "event_id_2", "event_id_3")
@@ -41,7 +41,7 @@ class NostrFilterTest {
         val correctFilterJson =
             """{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}"""
 
-        val filterJson = testEventMapper.writeValueAsString(filter)
+        val filterJson = nostrFilterEventMapper.writeValueAsString(filter)
         println("Correct filterJson: \n $correctFilterJson")
         println("Generated filterJson: \n $filterJson")
         assertEquals(filterJson, correctFilterJson)
@@ -60,8 +60,8 @@ class NostrFilterTest {
             referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit
         )
 
-        val filterJson = testEventMapper.writeValueAsString(filter)
-        val cloneFilterJson = testEventMapper.writeValueAsString(cloneFilter)
+        val filterJson = nostrFilterEventMapper.writeValueAsString(filter)
+        val cloneFilterJson = nostrFilterEventMapper.writeValueAsString(cloneFilter)
 
         println(filter)
         println(cloneFilter)
@@ -76,7 +76,7 @@ class NostrFilterTest {
         val previousTimestamp = currentTimestamp - 24 * 60 * 60
      val textEventFilter = NostrFilter(null, null, listOf(1),
          null, null, previousTimestamp, currentTimestamp, 30)
-        val filterJson = testEventMapper.writeValueAsString(textEventFilter)
+        val filterJson = nostrFilterEventMapper.writeValueAsString(textEventFilter)
         val correctRequestJson = """{"kinds":[1],"since":1653736339,"until":1653822739,"limit":30}"""
         println(filterJson)
         assertEquals(correctRequestJson, filterJson)

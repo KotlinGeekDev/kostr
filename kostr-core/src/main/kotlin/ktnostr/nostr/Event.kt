@@ -30,8 +30,7 @@ data class Event(
 
 
 
-
-fun getEventId(
+ internal fun getEventId(
     pubkey: String, timeStamp: Long, eventKind: Int,
     tags: List<Tag>, content: String
 ): String {

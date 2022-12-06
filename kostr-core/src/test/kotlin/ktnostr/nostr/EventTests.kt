@@ -10,7 +10,7 @@ class EventTests {
     @Test
     fun `it generates the correct raw event json for obtaining the eventId`() {
         val someTags = listOf(
-            Tag("#p", "42365g3ghgf7gg15hj64jk", null)
+            Tag("#p", "42365g3ghgf7gg15hj64jk")
             //Triple("#e", "546454ghgfnfg56456fgngg", "wss://relayer.fiatjaf.com")
         )
         println("Test 1:")
@@ -29,21 +29,21 @@ class EventTests {
 
     }
 
-    @Test
-    fun `it generates correct events with multiple tags`() {
-//        val eventTestTag = listOf(
-//            Tag("p", "13adc511de7e1cfcf1c6b7f6365fb5a03442d7bcacf565ea57fa7770912c023d"),
-//        )
-//        val rawEventTestData = listOf("f86c44a2de95d9149b51c6a29afeabba264c18e2fa7c49de93424a0c56947785",
-//            "1640839235", "4", "uRuvYr585B80L6rSJiHocw==?iv=oh6LVqdsYYol3JfFnXTbPA==",
-//            "a5d9290ef9659083c490b303eb7ee41356d8778ff19f2f91776c8dc4443388a64ffcf336e61af4c25c05ac3ae952d1ced889ed655b67790891222aaa15b99fdd")
-//        val eventId = getEventId(rawEventTestData[0], rawEventTestData[1].toLong(),
-//            rawEventTestData[2].toInt(), eventTestTag, rawEventTestData[3])
-//        val testEvent = Event(eventId, rawEventTestData[0], rawEventTestData[1].toLong(),
-//            rawEventTestData[2].toInt(), eventTestTag, rawEventTestData[3], rawEventTestData[4])
-//        val eventJson = testEvent.serialize()
-//
-//        println(eventJson)
+//    @Test
+//    fun `it generates correct events with multiple tags`() {
 //        assert(true)
+//    }
+
+    @Test
+    fun `testing the equivalence of event ids during event generation`(){
+        val secKeyHex = "6ba903b7888191180a0959a6d286b9d0719d33a47395c519ba107470412d2069"
+        val pubKeyHex = "8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f"
+
+        val profileEvent = Events.MetadataEvent(secKeyHex, pubKeyHex, profile = "Name.", timeStamp = 1640839235)
+        val correspondingEvent = Events.generateEvent(EventKind.METADATA, emptyList(),
+            "Name.", secKeyHex, pubKeyHex, timeStamp = 1640839235)
+        println("Profile Ev: $profileEvent")
+        println("Corr. Ev: $correspondingEvent")
+        assertEquals(profileEvent.id, correspondingEvent.id)
     }
 }
