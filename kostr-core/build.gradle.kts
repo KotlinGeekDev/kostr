@@ -1,7 +1,7 @@
-val scarletVersion = "0.1.12"
+
 val kotlinVersion = "1.7.10"
-val jacksonVersion = "2.13.3"
-val ktorVersion = "2.2.2"
+val jacksonVersion = "2.14.2"
+val ktorVersion = "2.3.0"
 
 plugins {
     `java-library`
@@ -28,10 +28,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-    implementation("com.tinder.scarlet:scarlet:${scarletVersion}")
-    implementation("com.tinder.scarlet:websocket-okhttp:${scarletVersion}")
-    implementation("com.tinder.scarlet:stream-adapter-built-in:${scarletVersion}")
-    implementation("com.tinder.scarlet:message-adapter-jackson:${scarletVersion}")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
     implementation("fr.acinq.secp256k1:secp256k1-kmp:0.7.1")
