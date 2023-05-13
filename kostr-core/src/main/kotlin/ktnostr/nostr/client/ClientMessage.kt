@@ -21,7 +21,7 @@ data class RequestMessage(
     override val messageType: String = "REQ",
     val subscriptionId: String,
     @JsonSerialize(using = FilterListSerializer::class)
-    val filters: List<NostrFilter>
+    val filters: List<NostrFilter>?
 ) : ClientMessage(messageType)
 
 @JsonFormat(shape = JsonFormat.Shape.ARRAY)
