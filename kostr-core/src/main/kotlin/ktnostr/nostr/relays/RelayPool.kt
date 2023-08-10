@@ -4,7 +4,7 @@ import ktnostr.nostr.RelayError
 
 class RelayPool {
 
-    private lateinit var relayList: MutableList<Relay>
+    private var relayList: MutableList<Relay>
     constructor(){
         relayList = getDefaultRelays().toMutableList()
     }
