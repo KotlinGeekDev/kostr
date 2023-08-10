@@ -18,11 +18,13 @@ class ClientMessageTests {
     @Parameter
     lateinit var tv: TV
 
+    fun stringifyMessage(message: ClientMessage) = testEventMapper.writeValueAsString(message)
+
     @Test
     fun requestMessageTest() {
         val requestMessage =
             RequestMessage(subscriptionId = "mySub", filters = tv.nostrFilters)
-        val requestJson = testEventMapper.writeValueAsString(requestMessage)
+        val requestJson = stringifyMessage(requestMessage)
         assertEquals(tv.nostrFilterJson, requestJson)
     }
 

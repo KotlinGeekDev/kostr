@@ -25,8 +25,14 @@ object Events {
         val eventIDRaw = eventID.toBytes()
         val signature = CryptoUtils.signContent(privateKeyHex.toBytes(), eventIDRaw)
         val signatureString = signature.toHexString()
+        val normalizedTags = tags.map {
+            Tag(it.identifier.drop(1),
+                it.description,
+                it.recommendedRelayUrl,
+                it.petname)
+        }
 
-        return Event(eventID, publicKeyHex, timeStamp, eventKind, tags, content, signatureString)
+        return Event(eventID, publicKeyHex, timeStamp, eventKind, normalizedTags, content, signatureString)
     }
 
     @JvmStatic
@@ -42,43 +48,48 @@ object Events {
     @JvmStatic
     fun TextEvent(privkey: String, pubkey: String,
                   tags: List<Tag> = emptyList(),
+                  timeStamp: Long = currentSystemTimestamp(),
                   kind: Int = EventKind.TEXT_NOTE, content: String): Event {
-        return generateEvent(kind, tags, content, privkey, pubkey)
+        return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
     @JvmStatic
     fun RelayRecommendationEvent(privkey: String, pubkey: String,
                                  tags: List<Tag> = emptyList(),
+                                 timeStamp: Long = currentSystemTimestamp(),
                                  kind: Int = EventKind.RELAY_RECOMMENDATION,
                                  content: String): Event {
         if (!(content.startsWith("wss") || content.startsWith("ws"))) {
             throw EventValidationError("Content $content is not a valid relay URL.")
             }
-        return generateEvent(kind, tags, content, privkey, pubkey)
+        return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
     @JvmStatic
     fun FollowEvent(privkey: String, pubkey: String,
                     tags: List<Tag>,
+                    timeStamp: Long = currentSystemTimestamp(),
                     kind: Int = EventKind.CONTACT_LIST,
                     content: String): Event {
-        return generateEvent(kind, tags, content, privkey, pubkey)
+        return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
     @JvmStatic
     fun DirectMessageEvent(privkey: String, pubkey: String,
                            tags: List<Tag> = emptyList(),
+                           timeStamp: Long = currentSystemTimestamp(),
                            kind: Int = EventKind.ENCRYPTED_DM,
                            content: String): Event {
-        return generateEvent(kind, tags, content, privkey, pubkey)
+        return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
     @JvmStatic
     fun DeletionEvent(privkey: String, pubkey: String,
                       tags: List<Tag> = emptyList(),
+                      timeStamp: Long = currentSystemTimestamp(),
                       kind: Int = EventKind.MARKED_FOR_DELETION,
                       content: String): Event {
-        return generateEvent(kind, tags, content, privkey, pubkey)
+        return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
 }

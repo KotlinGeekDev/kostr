@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 
 /**
  * The model representing the event tag. The event tag carries
- * information such as what identifies the tag('p', 'e', etc), the tag's
+ * information such as what identifies the tag('p', 'e', etc.), the tag's
  * content, or description(a referenced pubkey, event, etc),
  * a recommended relay url(optional), which you can add to the list
  * of relays you already have, and a petname or username(optional),
