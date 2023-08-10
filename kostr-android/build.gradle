@@ -59,7 +59,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.AnonymousGeekDev'
                 artifactId = 'kostr-android'
-                version = '0.1-pre-alpha-8'
+                version = '0.1-pre-alpha-9'
                 //artifact(releaseSourcesJar)
             }
         }
