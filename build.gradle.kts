@@ -1,7 +1,3 @@
-//plugins {
-//    `maven-publish`
-//}
-
 buildscript {
 
     repositories {
@@ -11,8 +7,7 @@ buildscript {
 
     dependencies {
 
-        classpath("com.android.tools.build:gradle:7.2.2")
-        //classpath(kotlin("stdlib", "1.5.31"))
+        classpath("com.android.tools.build:gradle:8.0.2")
 
     }
 
@@ -27,7 +22,7 @@ allprojects {
     }
 
     group = "com.github.AnonymousGeekDev"
-    version = "0.1-pre-alpha-8"
+    version = "0.1-pre-alpha-9"
 
 }
 

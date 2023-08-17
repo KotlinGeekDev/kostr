@@ -1,12 +1,13 @@
 plugins {
     id 'com.android.library'
-    id 'org.jetbrains.kotlin.android' version '1.7.10'
+    id 'org.jetbrains.kotlin.android' version '1.9.0'
     id 'maven-publish'
 }
 
 android {
+    namespace "ktnostr.nostr.android"
     compileSdk 33
-    buildToolsVersion '31.0.0'
+    buildToolsVersion = '31.0.0'
 
     defaultConfig {
         minSdk 21
@@ -26,11 +27,11 @@ android {
     }
     compileOptions {
         coreLibraryDesugaringEnabled true
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
 
 }
@@ -43,7 +44,6 @@ android {
 dependencies {
 
     api project(":kostr-core")
-    implementation 'com.tinder.scarlet:lifecycle-android:0.1.12'
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:1.2.0"
     implementation 'androidx.appcompat:appcompat:1.4.1'
     testImplementation 'junit:junit:4.13.2'
