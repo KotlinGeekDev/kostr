@@ -1,18 +1,18 @@
 
 val kotlinVersion = "1.9.0"
-val jacksonVersion = "2.14.2"
-val ktorVersion = "2.3.0"
+val ktorVersion = "2.3.2"
 
 plugins {
     //`java-library`
     kotlin("multiplatform") version "1.9.0"
+    kotlin("plugin.serialization")
     `maven-publish`
 }
 
 
 
 kotlin {
-    explicitApi()
+    //explicitApi()
 
     jvm {
         compilations.all {
@@ -20,6 +20,9 @@ kotlin {
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
+            testLogging {
+                events("passed", "skipped", "failed")
+            }
         }
     }
 
@@ -36,8 +39,6 @@ kotlin {
             dependencies {
                 //Ktor
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
-
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
 
                 implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
@@ -86,7 +87,12 @@ kotlin {
             }
         }
 
-        val linuxMain by getting
+        val linuxMain by getting {
+            dependencies {
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
+            }
+        }
         val linuxTest by getting
     }
 }
@@ -94,31 +100,6 @@ kotlin {
 //tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 //    kotlinOptions.jvmTarget = "11"
 //}
-
-//dependencies {
-//
-//
-//    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-//    implementation("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
-//
-//
-//
-//
-//
-//    // implementation("com.squareup.moshi:moshi:1.13.0")
-//    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:${jacksonVersion}")
-//
-//}
-//
-//
-//
-//tasks.test {
-//    useJUnitPlatform()
-//    testLogging {
-//        events("passed", "skipped", "failed")
-//    }
-//}
-
 
 
 

@@ -1,13 +1,35 @@
-@file:JvmName("EventExt")
-
 package ktnostr.nostr
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import fr.acinq.secp256k1.Hex
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
 import ktnostr.crypto.CryptoUtils
 
-internal val eventMapper = jacksonObjectMapper()
+internal val eventMapper = Json
+@OptIn(ExperimentalSerializationApi::class)
+internal val arraySerializer: KSerializer<Array<String>> = ArraySerializer(String.serializer())
+
+internal class StringArraySerializer : KSerializer<Array<String>> {
+    private val builtinSerializer = arraySerializer
+    override val descriptor: SerialDescriptor
+        get() = builtinSerializer.descriptor
+
+    override fun deserialize(decoder: Decoder): Array<String> {
+        return decoder.decodeSerializableValue(builtinSerializer)
+    }
+
+    override fun serialize(encoder: Encoder, value: Array<String>) {
+        encoder.encodeSerializableValue(builtinSerializer, value)
+    }
+
+}
 
 /**
  * Keeping this function below for legacy purposes.
@@ -49,7 +71,7 @@ internal val eventMapper = jacksonObjectMapper()
 //    return event
 //}
 
-fun Event.isValid(): Boolean {
+public fun Event.isValid(): Boolean {
     val eventId = getEventId(
         this.pubkey, this.creationDate, this.eventKind,
         this.tags, this.content
@@ -70,13 +92,13 @@ fun Event.isValid(): Boolean {
     return true
 }
 
-fun Event.serialize(): String {
+public fun Event.serialize(): String {
     if (!this.isValid()) throw EventValidationError("Generated event is not valid")
-    return eventMapper.writeValueAsString(this)
+    return eventMapper.encodeToString(this)
 }
 
-fun deserializedEvent(eventJson: String): Event {
-    val deserializedEvent = eventMapper.readValue<Event>(eventJson)
+public fun deserializedEvent(eventJson: String): Event {
+    val deserializedEvent = eventMapper.decodeFromString<Event>(eventJson)
     if (!deserializedEvent.isValid()) throw EventValidationError("The event is invalid.")
     return deserializedEvent
 }

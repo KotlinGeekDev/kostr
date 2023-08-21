@@ -1,10 +1,12 @@
-@file:JvmName("EventModel")
 
 package ktnostr.nostr
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toHexString
+import kotlin.jvm.JvmStatic
 
 /**
  * The Event class representing the Nostr Event.
@@ -18,15 +20,16 @@ import ktnostr.crypto.toHexString
  * @param content The event's content, as a string
  * @param eventSignature The event's signature, as a 64-byte string
  */
+@Serializable
 data class Event(
     val id: String,
     val pubkey: String,
-    @JsonProperty("created_at") val creationDate: Long,
-    @JsonProperty("kind") val eventKind: Int,
+    @SerialName("created_at") val creationDate: Long,
+    @SerialName("kind") val eventKind: Int,
     val tags: List<Tag>,
     val content: String,
-    @JsonProperty("sig") val eventSignature: String
-) : java.io.Serializable
+    @SerialName("sig") val eventSignature: String
+)
 
 
 
@@ -46,7 +49,7 @@ internal fun rawEventJson0(
 ): String {
     val rawEventForSerialization = listOf(0, pubkey, timeStamp, eventKind, tags, content)
 
-    val serializedRawEvent = eventMapper.writeValueAsString(rawEventForSerialization)
+    val serializedRawEvent = eventMapper.encodeToString(rawEventForSerialization)
     return serializedRawEvent
 }
 
@@ -129,7 +132,7 @@ object EventKind {
     const val MARKED_FOR_DELETION = 5
 
     @JvmStatic
-    fun values(): List<Int> = listOf(
+    fun EventKind.values(): List<Int> = listOf(
         METADATA, TEXT_NOTE, RELAY_RECOMMENDATION,
         CONTACT_LIST, ENCRYPTED_DM, MARKED_FOR_DELETION
     )

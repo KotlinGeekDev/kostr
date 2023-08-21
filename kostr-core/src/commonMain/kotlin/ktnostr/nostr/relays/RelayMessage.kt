@@ -1,13 +1,9 @@
-@file:JvmName("NostrRelayMessage")
+@file:Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
 
 package ktnostr.nostr.relays
 
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.JsonDeserializer
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.node.ArrayNode
+import kotlinx.serialization.Serializable
+import ktnostr.nostr.StringArraySerializer
 
 /**
  * The model that represents the data sent from a relay.
@@ -17,7 +13,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode
  * @see RelayEventMessage
  * @see RelayNotice
  */
-@JsonDeserialize(using = RelayMessageConverter::class)
+@Serializable
 sealed class RelayMessage
 
 /**
@@ -27,7 +23,7 @@ sealed class RelayMessage
  * sense of it. You can do so using the provided deserializedEvent() function.
  * @see ktnostr.nostr.deserializedEvent
  */
-@JsonFormat(shape = JsonFormat.Shape.ARRAY)
+@Serializable(with = StringArraySerializer::class)
 data class RelayEventMessage(
     val messageType: String = "EVENT", val subscriptionId: String,
     val eventJson: String
@@ -38,34 +34,34 @@ data class RelayEventMessage(
  * The data is a JSON array of 2 elements, which is of the form: [[NOTICE, message]].
  * This could be due to the relay not having the data we need, or something else.
  */
-@JsonFormat(shape = JsonFormat.Shape.ARRAY)
+@Serializable(with = StringArraySerializer::class)
 data class RelayNotice(
     val messageType: String,
     val message: String
 ) : RelayMessage()
 
-private class RelayMessageConverter : JsonDeserializer<RelayMessage>() {
-
-    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): RelayMessage {
-        val messageTree = p?.readValueAsTree<ArrayNode>()
-        if (messageTree?.size()!! > 3 || messageTree.size() < 2) {
-            throw Exception("This message type is not supported.")
-        }
-
-
-        return if (messageTree.size() == 3) {
-            val messageType = messageTree[0].asText()
-            val subscriptionId = messageTree[1].asText()
-            val content = if (messageTree[2].isContainerNode) messageTree[2].toString() else ""
-            RelayEventMessage(messageType, subscriptionId, content)
-        } else {
-            val messageType = messageTree[0].asText()
-            val message = messageTree[1].asText()
-            RelayNotice(messageType, message)
-        }
-    }
-
-}
+//private class RelayMessageConverter : JsonDeserializer<RelayMessage>() {
+//
+//    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): RelayMessage {
+//        val messageTree = p?.readValueAsTree<ArrayNode>()
+//        if (messageTree?.size()!! > 3 || messageTree.size() < 2) {
+//            throw Exception("This message type is not supported.")
+//        }
+//
+//
+//        return if (messageTree.size() == 3) {
+//            val messageType = messageTree[0].asText()
+//            val subscriptionId = messageTree[1].asText()
+//            val content = if (messageTree[2].isContainerNode) messageTree[2].toString() else ""
+//            RelayEventMessage(messageType, subscriptionId, content)
+//        } else {
+//            val messageType = messageTree[0].asText()
+//            val message = messageTree[1].asText()
+//            RelayNotice(messageType, message)
+//        }
+//    }
+//
+//}
 
 
 //----This function is kept for legacy and last-resort purposes----

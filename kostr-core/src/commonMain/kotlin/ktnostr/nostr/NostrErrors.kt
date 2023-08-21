@@ -1,5 +1,3 @@
-@file:JvmName("NostrErrors")
-
 package ktnostr.nostr
 
 //The general class of Nostr Errors.
