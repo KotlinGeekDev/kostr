@@ -1,10 +1,11 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 val kotlinVersion = "1.9.0"
 val ktorVersion = "2.3.2"
 
 plugins {
     //`java-library`
-    kotlin("multiplatform") version "1.9.0"
+    kotlin("multiplatform")
     kotlin("plugin.serialization")
     `maven-publish`
 }
@@ -41,15 +42,22 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
                 implementation("io.ktor:ktor-client-websockets:$ktorVersion")
 
+                //Kotlin base
                 implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
                 implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
+                //Secp256k1-kmp
                 implementation("fr.acinq.secp256k1:secp256k1-kmp:0.10.1")
 
+                //Serialization
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+                //Coroutines
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-
+                //Atomics
+                implementation("org.jetbrains.kotlinx:atomicfu:0.22.0")
+                //UUID
+                implementation("com.benasher44:uuid:0.8.0")
             }
         }
 
@@ -100,6 +108,10 @@ kotlin {
 //tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 //    kotlinOptions.jvmTarget = "11"
 //}
+
+tasks.withType<KotlinNativeCompile>().configureEach {
+    compilerOptions.freeCompilerArgs.add("-opt-in=kotlinx.cinterop.ExperimentalForeignApi")
+}
 
 
 

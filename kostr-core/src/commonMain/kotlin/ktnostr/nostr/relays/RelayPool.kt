@@ -1,6 +1,7 @@
 package ktnostr.nostr.relays
 
 import ktnostr.nostr.RelayError
+import kotlin.jvm.JvmStatic
 
 class RelayPool {
 

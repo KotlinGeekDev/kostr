@@ -1,16 +1,17 @@
 package ktnostr.net
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import io.ktor.client.*
-import io.ktor.client.engine.okhttp.*
+import com.benasher44.uuid.bytes
+import com.benasher44.uuid.uuidOf
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
 import ktnostr.formattedDateTime
 import ktnostr.nostr.Event
 import ktnostr.nostr.NostrFilter
@@ -20,12 +21,13 @@ import ktnostr.nostr.client.RequestMessage
 import ktnostr.nostr.deserializedEvent
 import ktnostr.nostr.eventMapper
 import ktnostr.nostr.relays.*
-import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
+import kotlin.random.Random
+
 
 class NostrService(val relayPool: RelayPool) {
+    val uuidBytes = Random.nextBytes(32)
 
-    val client = HttpClient(OkHttp){
+    val client = httpClient {
         install(WebSockets){
 
         }
@@ -33,7 +35,7 @@ class NostrService(val relayPool: RelayPool) {
     }
 
     suspend fun sendFilters(
-        subscriptionId: String = UUID.randomUUID().toString().substring(0, 5),
+        subscriptionId: String = uuidOf(uuidBytes).bytes.decodeToString().substring(0, 5),
         filters: List<NostrFilter>? = null
     ){
         val createdReq = RequestMessage(subscriptionId = subscriptionId, filters = filters)
@@ -53,7 +55,7 @@ class NostrService(val relayPool: RelayPool) {
 
 
     suspend fun sendEvent(message: ClientMessage){
-        val eventJson = eventMapper.writeValueAsString(message)
+        val eventJson = eventMapper.encodeToString(message)
         relayPool.getRelays().forEach {
             client.webSocketSession(it.relayURI).send(eventJson)
         }
@@ -65,7 +67,7 @@ class NostrService(val relayPool: RelayPool) {
                         onRelayNotice: (Relay, RelayNotice) -> Unit,
                      //   onError: (Exception) -> Unit
     ){
-        val requestJson = eventMapper.writeValueAsString(requestMessage)
+        val requestJson = eventMapper.encodeToString(requestMessage)
         coroutineScope {
             for (relay in relayPool.getRelays()) {
                 launch {
@@ -76,7 +78,7 @@ class NostrService(val relayPool: RelayPool) {
                             val received = (frame as Frame.Text).readText()
                             //println(received)
 
-                            val receivedMessage = eventMapper.readValue<RelayMessage>(received)
+                            val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
 
                             when(receivedMessage){
                                 is RelayEventMessage -> {
@@ -101,7 +103,7 @@ class NostrService(val relayPool: RelayPool) {
     }
 
     suspend fun requestWithResult(requestMessage: RequestMessage): Result<List<Event>>? {
-        val requestJson = eventMapper.writeValueAsString(requestMessage)
+        val requestJson = eventMapper.encodeToString(requestMessage)
         val eventList = mutableListOf<Event>()
         var returnedResult : Result<List<Event>>? = null
 
@@ -140,7 +142,7 @@ class NostrService(val relayPool: RelayPool) {
                         val json = (it as Frame.Text).readText()
                         println(json)
 
-                        val receivedMessage = eventMapper.readValue<RelayMessage>(json)
+                        val receivedMessage = eventMapper.decodeFromString<RelayMessage>(json)
 
                         when (receivedMessage) {
                             is RelayEventMessage -> {
@@ -177,9 +179,9 @@ class NostrService(val relayPool: RelayPool) {
         requestMessage: RequestMessage,
         relayList: List<Relay> = relayPool.getRelays()
     ): Result<Event> {
-        val requestJson = eventMapper.writeValueAsString(requestMessage)
+        val requestJson = eventMapper.encodeToString(requestMessage)
         var returnedResult: Result<Event>? = null
-        val relayNoticesCount = AtomicInteger(0)
+        val relayNoticesCount = atomic(0)
         val connections = relayList.mapIndexed { index: Int, relay: Relay ->
 
             client.launch {
@@ -190,7 +192,7 @@ class NostrService(val relayPool: RelayPool) {
                         //println(received)
 
 
-                        val receivedMessage = eventMapper.readValue<RelayMessage>(received)
+                        val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
                         //println(receivedMessage.toString())
 
                         when (receivedMessage) {
@@ -207,7 +209,7 @@ class NostrService(val relayPool: RelayPool) {
                                 relayNoticesCount.getAndIncrement()
                                 println("Relay notice received from ${relay.relayURI} with index $index")
                                 println(receivedMessage)
-                                if (relayNoticesCount.get() == relayList.size){
+                                if (relayNoticesCount.value == relayList.size){
                                     client.cancel()
                                 }
 
