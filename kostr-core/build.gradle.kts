@@ -56,6 +56,8 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
                 //Atomics
                 implementation("org.jetbrains.kotlinx:atomicfu:0.22.0")
+                //Date-time
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
                 //UUID
                 implementation("com.benasher44:uuid:0.8.0")
             }
