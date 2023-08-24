@@ -2,11 +2,10 @@
 
 package ktnostr.crypto
 
+import dev.whyoleg.cryptography.algorithms.digest.SHA256
 import fr.acinq.secp256k1.Hex
 import fr.acinq.secp256k1.Secp256k1
 import fr.acinq.secp256k1.Secp256k1Exception
-import java.security.MessageDigest
-import java.security.SecureRandom
 
 //Class containing all the cryptographic helpers for Nostr
 object CryptoUtils {
@@ -39,8 +38,10 @@ object CryptoUtils {
      */
     //TODO: Should the function return a string or a byte array?
     fun contentHash(content: String): ByteArray {
-        return MessageDigest.getInstance("SHA-256")
-            .digest(content.toByteArray())
+        return getCryptoProvider().get(SHA256)
+            .hasher()
+            .hashBlocking(content.encodeToByteArray())
+
     }
 
     /**

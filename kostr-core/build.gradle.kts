@@ -47,8 +47,10 @@ kotlin {
                 implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
                 implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
-                //Secp256k1-kmp
+                //Crypto(Secp256k1-utils, SecureRandom, Hashing, etc.)
                 implementation("fr.acinq.secp256k1:secp256k1-kmp:0.10.1")
+                implementation("dev.whyoleg.cryptography:cryptography-core:0.1.0")
+                implementation("dev.whyoleg.cryptography:cryptography-random:0.1.0")
 
                 //Serialization
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
@@ -75,6 +77,7 @@ kotlin {
             dependencies {
                 //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
                 implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.10.1")
+                implementation("dev.whyoleg.cryptography:cryptography-jdk:0.1.0")
 
                 implementation("com.squareup.okhttp3:okhttp:4.10.0")
                 implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -101,6 +104,7 @@ kotlin {
             dependencies {
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
                 implementation("io.ktor:ktor-client-curl:$ktorVersion")
+                implementation("dev.whyoleg.cryptography:cryptography-openssl3-shared:0.1.0")
             }
         }
         val linuxTest by getting
