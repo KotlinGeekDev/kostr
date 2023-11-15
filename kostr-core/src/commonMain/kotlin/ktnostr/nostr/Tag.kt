@@ -21,8 +21,7 @@ import kotlinx.serialization.encoding.Encoder
  * @param recommendedRelayUrl (optional) A recommended relay url, as a string
  */
 
-//@JsonSerialize(using = Tag.TagSerializer::class)
-//@JsonDeserialize(using = Tag.TagDeserializer::class)
+
 @Serializable(with = Tag.TagSerializer::class)
 data class Tag(
     val identifier: String, val description: String,
@@ -56,33 +55,8 @@ data class Tag(
                 else -> Tag(array[0], array[1])
             }
         }
-//        override fun serialize(value: Tag?, gen: JsonGenerator, serializers: SerializerProvider?) {
-//            gen.writeStartArray()
-//            gen.writeString(value?.identifier)
-//            gen.writeString(value?.description)
-//            if (value?.recommendedRelayUrl != null) {
-//                gen.writeString(value.recommendedRelayUrl)
-//            }
-//            if (value?.petname != null) {
-//                gen.writeString(value.petname)
-//            }
-//            gen.writeEndArray()
-//        }
     }
 
-//    class TagDeserializer : JsonDeserializer<Tag>() {
-//        override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Tag {
-//            val codec: ObjectCodec = p.codec
-//            val kv = (codec.readTree(p) as ArrayNode).map { (it as JsonNode).asText() }
-//            val listSize = kv.size
-//            return when {
-//                listSize > 4 || listSize < 2 -> throw java.lang.Exception("Incorrect tag format.")
-//                listSize == 4 -> Tag(kv[0], kv[1], kv[2], kv[3])
-//                listSize == 3 -> Tag(kv[0], kv[1], kv[2])
-//                else -> Tag(kv[0], kv[1])
-//            }
-//        }
-//    }
 }
 
 //----Kept for legacy purposes, or when serialization above does not work----
