@@ -21,7 +21,7 @@ import kotlinx.serialization.json.*
  * @see RelayNotice
  */
 @Serializable(with = RelayMessage.RelayMessageSerializer::class)
-sealed class RelayMessage(open val messageType: String){
+sealed class RelayMessage(){
     internal companion object RelayMessageSerializer: KSerializer<RelayMessage> {
         private val listSerializer = ListSerializer(elementSerializer = String.serializer())
         override val descriptor: SerialDescriptor
@@ -80,12 +80,12 @@ sealed class RelayMessage(open val messageType: String){
  * @see ktnostr.nostr.deserializedEvent
  */
 
-@Serializable(with = RelayMessage.RelayMessageSerializer::class)
+@Serializable
 data class RelayEventMessage(
-    override val messageType: String = "EVENT",
+    val messageType: String = "EVENT",
     val subscriptionId: String,
     val eventJson: String
-) : RelayMessage(messageType)
+) : RelayMessage()
 
 /**
  * The model representing the case when the relay returns a message different from the normal response.
@@ -93,11 +93,11 @@ data class RelayEventMessage(
  * This could be due to the relay not having the data we need, or something else.
  */
 
-@Serializable(with = RelayMessage.RelayMessageSerializer::class)
+@Serializable
 data class RelayNotice(
-    override val messageType: String,
+    val messageType: String,
     val message: String
-) : RelayMessage(messageType)
+) : RelayMessage()
 
 
 

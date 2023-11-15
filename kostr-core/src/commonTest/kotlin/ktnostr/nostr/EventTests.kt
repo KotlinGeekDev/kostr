@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EventTests {
-    val testEventMapper = Json
+    private val testEventMapper = Json
 
     @Test
     fun `it generates the correct raw event json for obtaining the eventId`() {

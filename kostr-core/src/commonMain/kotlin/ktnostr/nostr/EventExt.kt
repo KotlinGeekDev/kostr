@@ -71,7 +71,7 @@ internal class StringArraySerializer : KSerializer<Array<String>> {
 //    return event
 //}
 
-public fun Event.isValid(): Boolean {
+fun Event.isValid(): Boolean {
     val eventId = getEventId(
         this.pubkey, this.creationDate, this.eventKind,
         this.tags, this.content
@@ -92,13 +92,13 @@ public fun Event.isValid(): Boolean {
     return true
 }
 
-public fun Event.serialize(): String {
+fun Event.serialize(): String {
     if (!this.isValid()) throw EventValidationError("Generated event is not valid")
     return eventMapper.encodeToString(this)
 }
 
 public fun deserializedEvent(eventJson: String): Event {
     val deserializedEvent = eventMapper.decodeFromString<Event>(eventJson)
-    if (!deserializedEvent.isValid()) throw EventValidationError("The event is invalid.")
+    if (!deserializedEvent.isValid()) throw EventValidationError("The event is invalid. \n Event: $deserializedEvent")
     return deserializedEvent
 }
