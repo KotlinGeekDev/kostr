@@ -3,7 +3,9 @@ package ktnostr.nostr
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toHexString
 import kotlin.jvm.JvmStatic
@@ -47,10 +49,16 @@ internal fun rawEventJson0(
     pubkey: String, timeStamp: Long, eventKind: Int,
     tags: List<Tag>, content: String
 ): String {
-    val rawEventForSerialization = listOf(0, pubkey, timeStamp, eventKind, tags, content)
-
-    val serializedRawEvent = eventMapper.encodeToString(rawEventForSerialization)
-    return serializedRawEvent
+    val serializedRawEvent = buildJsonArray {
+        add(0)
+        add(pubkey)
+        add(timeStamp)
+        add(eventKind)
+        val tagListElement = eventMapper.encodeToJsonElement(ListSerializer(Tag.TagSerializer()), tags)
+        add(tagListElement)
+        add(content)
+    }
+    return serializedRawEvent.toString()
 }
 
 
