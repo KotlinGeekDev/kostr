@@ -26,6 +26,7 @@ import kotlin.random.Random
 
 class NostrService(val relayPool: RelayPool) {
     val uuidBytes = Random.nextBytes(32)
+    val relayNoticesCount = atomic(0)
 
     val client = httpClient {
         install(WebSockets){
@@ -181,7 +182,6 @@ class NostrService(val relayPool: RelayPool) {
     ): Result<Event> {
         val requestJson = eventMapper.encodeToString(requestMessage)
         var returnedResult: Result<Event>? = null
-        val relayNoticesCount = atomic(0)
         val connections = relayList.mapIndexed { index: Int, relay: Relay ->
 
             client.launch {

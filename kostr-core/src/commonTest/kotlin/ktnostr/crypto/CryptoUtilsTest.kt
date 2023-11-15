@@ -1,6 +1,6 @@
 package ktnostr.crypto
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 
 class CryptoUtilsTest {
@@ -26,7 +26,7 @@ class CryptoUtilsTest {
     fun `the kotlin stdlib byte conversion is the same as secp256k1-kmp`(){
         val pubKeyHex = "8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f"
         val secpBytes = pubKeyHex.toBytes()
-        val stdlibBytes = pubKeyHex.toByteArray()
+        val stdlibBytes = pubKeyHex.encodeToByteArray()
         val secpString = secpBytes.toHexString()
         val stdlibString = stdlibBytes.decodeToString()
         assertEquals(secpString, stdlibString, "Do not match!")

@@ -1,11 +1,11 @@
 package ktnostr.nostr
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import org.junit.jupiter.api.Test
+import kotlinx.serialization.json.Json
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class EventTests {
-    val testEventMapper = jacksonObjectMapper()
+    val testEventMapper = Json
 
     @Test
     fun `it generates the correct raw event json for obtaining the eventId`() {

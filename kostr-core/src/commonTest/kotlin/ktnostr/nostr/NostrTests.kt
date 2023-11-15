@@ -1,6 +1,8 @@
 package ktnostr.nostr
 
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class NostrTests {
     @Test
@@ -17,7 +19,7 @@ class NostrTests {
             rawEventTestData[2].toInt(), eventTestTag, rawEventTestData[3]
         )
         println("Test Event Id: $eventId")
-        assert(eventId == "2be17aa3031bdcb006f0fce80c146dea9c1c0268b0af2398bb673365c6444d45")
+        assertTrue(eventId == "2be17aa3031bdcb006f0fce80c146dea9c1c0268b0af2398bb673365c6444d45")
     }
 
     @Test
@@ -44,7 +46,7 @@ class NostrTests {
         println(eventJson)
         println(" ")
         println(correctTestEventJson)
-        assert(eventJson == correctTestEventJson)
+        assertEquals(correctTestEventJson, eventJson)
     }
 
     @Test
@@ -64,7 +66,7 @@ class NostrTests {
             testEvent.pubkey, testEvent.creationDate,
             testEvent.eventKind, testEvent.tags, testEvent.content
         )
-        assert(generatedEventId == testEvent.id)
+        assertEquals(testEvent.id, generatedEventId)
     }
 
     @Test
@@ -91,6 +93,6 @@ class NostrTests {
         println(event)
         println("Correct Event:")
         println(correctlyParsedEvent)
-        assert(event == correctlyParsedEvent)
+        assertEquals(correctlyParsedEvent, event)
     }
 }
