@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class NostrFilterTest {
-    val nostrFilterEventMapper = Json
+    private val nostrFilterEventMapper = Json
 
     // For the first filter
     private val eventIdList = listOf("event_id_1", "event_id_2", "event_id_3")
