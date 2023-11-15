@@ -6,6 +6,8 @@ import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toBytes
 import ktnostr.crypto.toHexString
 import ktnostr.currentSystemTimestamp
+import kotlin.jvm.JvmName
+import kotlin.jvm.JvmStatic
 
 object Events {
 
