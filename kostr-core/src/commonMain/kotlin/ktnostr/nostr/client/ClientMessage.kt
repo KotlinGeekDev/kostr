@@ -1,65 +1,140 @@
-@file:Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
-
 package ktnostr.nostr.client
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.encodeCollection
+import kotlinx.serialization.json.*
 import ktnostr.nostr.Event
 import ktnostr.nostr.NostrFilter
-import ktnostr.nostr.StringArraySerializer
 
-@Serializable
-sealed class ClientMessage(open val messageType: String)
+@Serializable(with = ClientMessage.MessageSerializer::class)
+sealed class ClientMessage(open val messageType: String){
+    companion object MessageSerializer : KSerializer<ClientMessage> {
+        private val listSerializer = ListSerializer(elementSerializer = String.serializer())
 
-//@JsonFormat(shape = JsonFormat.Shape.ARRAY)
-@Serializable(with = StringArraySerializer::class)
+        override val descriptor: SerialDescriptor
+            get() = listSerializer.descriptor
+
+        override fun deserialize(decoder: Decoder): ClientMessage {
+            val jsonDecoder = (decoder as JsonDecoder)
+            val message = jsonDecoder.decodeJsonElement().jsonArray
+            val marker = message[0].jsonPrimitive.content
+            println("Message type : $marker")
+            val clientMessage = when(marker) {
+
+                "REQ" -> {
+                    val requestMessage = decodeToRequestMessage(jsonDecoder, message)
+                    requestMessage
+                }
+                "EVENT" -> {
+                    val clientEventMessage = decodeToEventMessage(jsonDecoder, message)
+                    clientEventMessage
+                }
+                "CLOSE" -> {
+                    val closeRequest = decodeToCloseRequest(jsonDecoder, message)
+                    closeRequest
+                }
+                else -> {
+                    throw SerializationException("Unrecognized message type: $marker")
+                }
+            }
+            return clientMessage
+        }
+
+        @OptIn(ExperimentalSerializationApi::class)
+        override fun serialize(encoder: Encoder, value: ClientMessage) {
+            val jsonElementEncoder = (encoder as JsonEncoder).json
+            val encodedMessage = buildJsonArray {
+                val type = jsonElementEncoder.encodeToJsonElement(value.messageType)
+                add(type)
+                when(value){
+                    is ClientEventMessage -> {
+                        val eventElement = jsonElementEncoder.encodeToJsonElement(Event.serializer(), value.event)
+                        add(eventElement)
+                    }
+                    is CloseRequest -> {
+                        val idElement = jsonElementEncoder.encodeToJsonElement(value.subscriptionId)
+                        add(idElement)
+                    }
+                    is RequestMessage -> {
+                        val idElement = jsonElementEncoder.parseToJsonElement(value.subscriptionId)
+                        val filtersElement = value.filters?.map { filter ->
+                            jsonElementEncoder.encodeToJsonElement(NostrFilter.serializer(), filter)
+                        }
+                        add(idElement)
+                        if (filtersElement != null) {
+                            addAll(filtersElement)
+                        } else {
+                            error("NostrFilter error: could not build filter.")
+                        }
+                    }
+                }
+            }
+            encoder.encodeJsonElement(encodedMessage)
+        }
+    }
+}
+
+
 data class ClientEventMessage(
     override val messageType: String = "EVENT",
     val event: Event
 ) : ClientMessage(messageType)
 
-@Serializable(with = StringArraySerializer::class)
 data class RequestMessage(
     override val messageType: String = "REQ",
     val subscriptionId: String,
-    @Serializable(with = FilterListSerializer::class)
     val filters: List<NostrFilter>?
 ) : ClientMessage(messageType)
 
-@Serializable(with = StringArraySerializer::class)
+
 data class CloseRequest(
     override val messageType: String = "CLOSE",
     val subscriptionId: String
 ) : ClientMessage(messageType)
 
+private fun decodeToRequestMessage(jsonDecoder: JsonDecoder, jsonArray: JsonArray): RequestMessage {
+    var requestMarker: String? = null
+    var subscriptionId: String? = null
+    val filterList = mutableListOf<NostrFilter>()
 
-
-class FilterListSerializer : KSerializer<List<NostrFilter>> {
-    val default = ListSerializer(elementSerializer = NostrFilter.serializer())
-    override val descriptor: SerialDescriptor
-        get() = default.descriptor
-
-    override fun serialize(encoder: Encoder, value: List<NostrFilter>) {
-        encoder.encodeCollection(descriptor, value, { index, filter ->  })
+    jsonArray.forEachIndexed { index, element ->
+        when(index){
+            0 -> {
+                val requestMarkerElement = element.jsonPrimitive
+                if (requestMarkerElement.isString){
+                    requestMarker = requestMarkerElement.content
+                } else {
+                    error("Cannot decode this request filter. Marker content: ${requestMarkerElement.content}")
+                }
+            }
+            1 -> {
+                val idStringElement = element.jsonPrimitive
+                subscriptionId = idStringElement.content
+            }
+            else -> {
+                val filterElement = jsonDecoder.json.decodeFromJsonElement<NostrFilter>(element)
+                filterList.add(filterElement)
+            }
+        }
     }
+    return RequestMessage(requestMarker.toString(), subscriptionId.toString(), filterList)
+}
 
-    override fun deserialize(decoder: Decoder): List<NostrFilter> {
-        val filterList = decoder.decodeSerializableValue(default)
-        return filterList
-    }
-//    override fun serialize(
-//        value: List<NostrFilter>?,
-//        gen: JsonGenerator?,
-//        serializers: SerializerProvider?
-//    ) {
-//        value?.forEach { filter ->
-//            gen?.writeObject(filter)
-//        }
-//    }
+private fun decodeToEventMessage(jsonDecoder: JsonDecoder, jsonArray: JsonArray): ClientEventMessage {
+    val eventMarker = jsonArray[0].jsonPrimitive.content
+    val event = jsonDecoder.json.decodeFromJsonElement(Event.serializer(), jsonArray[1])
+    return ClientEventMessage(eventMarker, event)
+}
 
+private fun decodeToCloseRequest(jsonDecoder: JsonDecoder, jsonArray: JsonArray): CloseRequest {
+    val closeMarker = jsonArray[0].jsonPrimitive.content
+    val subscriptionId = jsonDecoder.json.decodeFromJsonElement(String.serializer(), jsonArray[1])
+    return CloseRequest(closeMarker, subscriptionId)
 }

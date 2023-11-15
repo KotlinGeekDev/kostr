@@ -1,9 +1,16 @@
-@file:Suppress("SERIALIZER_TYPE_INCOMPATIBLE")
+
 
 package ktnostr.nostr.relays
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
-import ktnostr.nostr.StringArraySerializer
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.*
 
 /**
  * The model that represents the data sent from a relay.
@@ -13,8 +20,57 @@ import ktnostr.nostr.StringArraySerializer
  * @see RelayEventMessage
  * @see RelayNotice
  */
-@Serializable
-sealed class RelayMessage
+@Serializable(with = RelayMessage.RelayMessageSerializer::class)
+sealed class RelayMessage(open val messageType: String){
+    internal companion object RelayMessageSerializer: KSerializer<RelayMessage> {
+        private val listSerializer = ListSerializer(elementSerializer = String.serializer())
+        override val descriptor: SerialDescriptor
+            get() = listSerializer.descriptor
+
+        override fun deserialize(decoder: Decoder): RelayMessage {
+            val jsonMessageDecoder = decoder as JsonDecoder
+            val messageJsonArray = jsonMessageDecoder.decodeJsonElement().jsonArray
+            if (messageJsonArray.size > 3 || messageJsonArray.size < 2){
+                throw SerializationException("Message type is not supported for message $messageJsonArray")
+            }
+            return if (messageJsonArray.size == 3){
+                val messageMarker = messageJsonArray[0].jsonPrimitive.content
+                val subscriptionId = messageJsonArray[1].jsonPrimitive.content
+                val eventJsonNode = messageJsonArray[2]
+                val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
+                RelayEventMessage(messageMarker, subscriptionId, eventJson)
+            } else {
+                val noticeMarker = messageJsonArray[0].jsonPrimitive.content
+                val noticeMessage = messageJsonArray[1].jsonPrimitive.content
+                RelayNotice(noticeMarker, noticeMessage)
+            }
+        }
+
+        override fun serialize(encoder: Encoder, value: RelayMessage) {
+            val messageEncoder = (encoder as JsonEncoder).json
+            val encodedMessage = buildJsonArray {
+                when(value){
+                    is RelayEventMessage -> {
+                        val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
+                        val subscriptionMarker = messageEncoder.encodeToJsonElement(value.subscriptionId)
+                        val eventJsonMarker = messageEncoder.encodeToJsonElement(value.eventJson)
+                        add(messageTypeMarker)
+                        add(subscriptionMarker)
+                        add(eventJsonMarker)
+                    }
+                    is RelayNotice -> {
+                        val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
+                        val contentMarker = messageEncoder.encodeToJsonElement(value.message)
+                        add(messageTypeMarker)
+                        add(contentMarker)
+                    }
+                }
+            }
+            encoder.encodeJsonElement(encodedMessage)
+        }
+
+    }
+}
 
 /**
  * The model representing the case when a relay sends the data we request.
@@ -23,22 +79,28 @@ sealed class RelayMessage
  * sense of it. You can do so using the provided deserializedEvent() function.
  * @see ktnostr.nostr.deserializedEvent
  */
-@Serializable(with = StringArraySerializer::class)
+
+@Serializable(with = RelayMessage.RelayMessageSerializer::class)
 data class RelayEventMessage(
-    val messageType: String = "EVENT", val subscriptionId: String,
+    override val messageType: String = "EVENT",
+    val subscriptionId: String,
     val eventJson: String
-) : RelayMessage()
+) : RelayMessage(messageType)
 
 /**
  * The model representing the case when the relay returns a message different from the normal response.
  * The data is a JSON array of 2 elements, which is of the form: [[NOTICE, message]].
  * This could be due to the relay not having the data we need, or something else.
  */
-@Serializable(with = StringArraySerializer::class)
+
+@Serializable(with = RelayMessage.RelayMessageSerializer::class)
 data class RelayNotice(
-    val messageType: String,
+    override val messageType: String,
     val message: String
-) : RelayMessage()
+) : RelayMessage(messageType)
+
+
+
 
 //private class RelayMessageConverter : JsonDeserializer<RelayMessage>() {
 //

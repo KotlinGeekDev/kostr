@@ -1,31 +1,48 @@
 package ktnostr.nostr.client
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import ktnostr.nostr.EventKind
 import ktnostr.nostr.NostrFilter
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import kotlin.jvm.JvmStatic
+import kotlin.test.Test
 import kotlin.test.assertEquals
 
 data class TV(val nostrFilters: List<NostrFilter>, val nostrFilterJson: String)
 
-@RunWith(Parameterized::class)
 class ClientMessageTests {
-    val testEventMapper = jacksonObjectMapper()
-    @Parameter
-    lateinit var tv: TV
-
-    fun stringifyMessage(message: ClientMessage) = testEventMapper.writeValueAsString(message)
+    private val testEventMapper = Json
+    private fun stringifyMessage(message: ClientMessage) = testEventMapper.encodeToString(message)
 
     @Test
-    fun requestMessageTest() {
+    fun `close request decodes properly`(){
+        val closeRequest = CloseRequest(subscriptionId = "mySub")
+        val closeRequestJson = """["CLOSE", "mySub"]"""
+        val decodedCloseRequest = testEventMapper.decodeFromString<ClientMessage>(closeRequestJson)
+        assertEquals(closeRequest, decodedCloseRequest)
+    }
+
+    @Test
+    fun `single filter request message encodes properly`(){
+        val requestMessage = RequestMessage(subscriptionId = "mySub", filters = listOf(filterOne))
+        val resultingJson = stringifyMessage(requestMessage)
+        assertEquals(testVectors().first().nostrFilterJson, resultingJson)
+    }
+
+    @Test
+    fun `single filter request message decodes properly`(){
+        val filterRequestJson = testVectors().first().nostrFilterJson
+        val resultingFilter = testEventMapper.decodeFromString<ClientMessage>(filterRequestJson)
+        val correctRequest = RequestMessage(subscriptionId = "mySub", filters = testVectors().first().nostrFilters)
+        assertEquals(correctRequest, resultingFilter)
+    }
+
+    @Test
+    fun `multiple filter request message encodes properly`() {
         val requestMessage =
-            RequestMessage(subscriptionId = "mySub", filters = tv.nostrFilters)
+            RequestMessage(subscriptionId = "mySub", filters = listOf(filterOne, filterTwo))
         val requestJson = stringifyMessage(requestMessage)
-        assertEquals(tv.nostrFilterJson, requestJson)
+        assertEquals(testVectors().last().nostrFilterJson, requestJson)
     }
 
     companion object {
@@ -50,7 +67,6 @@ class ClientMessageTests {
                     limit = 10
                 )
         @JvmStatic
-        @Parameters
         fun testVectors() = listOf(
             TV(listOf(filterOne), """["REQ","mySub",{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}]"""),
             TV(listOf(filterTwo), """["REQ","mySub",{"ids":["event_id_4","event_id_5"],"authors":["author_pubkey_3","author_pubkey_4"],"kinds":[0,2],"#e":["ref_event_id_3","ref_event_id_4"],"#p":["ref_pubkey_2","ref_pubkey_3","ref_pubkey_4"],"since":1653736339,"until":1653822739,"limit":10}]"""),
