@@ -119,15 +119,23 @@ tasks.withType<KotlinNativeCompile>().configureEach {
 }
 
 
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
 
 publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = project.parent?.group.toString()
-            artifactId = project.name
-            version = project.parent?.version.toString()
-            //artifact(tasks.kotlinSourcesJar)
-            from(components["kotlin"])
-        }
+    publications.withType<MavenPublication>(){
+        artifact(javadocJar)
     }
+//    publications {
+//        project.sourceSets.forEach { sourceSet ->
+//            withType<MavenPublication> {
+//                groupId = project.parent?.group.toString()
+//                artifactId = sourceSet.name
+//                version = project.parent?.version.toString()
+//                artifact(tasks.jar)
+//                //from(components["kotlin"])
+//            }
+//        }
+//    }
 }
