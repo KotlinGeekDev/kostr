@@ -10,6 +10,7 @@ data class NostrFilter(
     @SerialName("kinds") val listOfKinds: List<Int>,
     @SerialName("#e") val eventIdList: List<String>? = null,
     @SerialName("#p") val pubkeyList: List<String>? = null,
+    @SerialName("#t") val topicList: List<String>? = null,
     val since: Long? = null,
     val until: Long? = null,
     val limit: Int = 1
