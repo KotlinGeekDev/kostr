@@ -17,7 +17,7 @@ kotlin {
 
     jvm {
         compilations.all {
-            kotlinOptions.jvmTarget = "11"
+            kotlinOptions.jvmTarget = "17"
         }
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -82,7 +82,7 @@ kotlin {
             implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.10.1")
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.2.0")
 
-            implementation("com.squareup.okhttp3:okhttp:4.10.0")
+            implementation("com.squareup.okhttp3:okhttp:4.11.0")
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
         }
 
@@ -110,9 +110,9 @@ kotlin {
     }
 }
 
-//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-//    kotlinOptions.jvmTarget = "11"
-//}
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
+    kotlinOptions.jvmTarget = "17"
+}
 
 tasks.withType<KotlinNativeCompile>().configureEach {
     compilerOptions.freeCompilerArgs.add("-opt-in=kotlinx.cinterop.ExperimentalForeignApi")
