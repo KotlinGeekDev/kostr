@@ -99,7 +99,7 @@ kotlin {
 
         linuxMain.dependencies {
             implementation("io.ktor:ktor-client-cio:$ktorVersion")
-            implementation("io.ktor:ktor-client-curl:$ktorVersion")
+            //implementation("io.ktor:ktor-client-curl:$ktorVersion")
             implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:0.2.0")
         }
 
