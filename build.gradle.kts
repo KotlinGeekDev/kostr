@@ -29,7 +29,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
     apply(plugin = "kotlinx-atomicfu")
 
-    group = "com.github.AnonymousGeekDev"
+    group = "com.github.KotlinGeekDev"
     version = "0.1-pre-alpha-9"
 
 }

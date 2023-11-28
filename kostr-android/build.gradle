@@ -57,7 +57,7 @@ afterEvaluate {
         publications {
             release(MavenPublication){
                 from components.release
-                groupId = 'com.github.AnonymousGeekDev'
+                groupId = 'com.github.KotlinGeekDev'
                 artifactId = 'kostr-android'
                 version = '0.1-pre-alpha-8'
                 //artifact(releaseSourcesJar)
