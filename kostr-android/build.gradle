@@ -6,12 +6,13 @@ plugins {
 
 android {
     namespace "ktnostr.nostr.android"
-    compileSdk 33
+    compileSdk 34
     buildToolsVersion = '31.0.0'
 
     defaultConfig {
         minSdk 21
-        targetSdk 33
+        //noinspection EditedTargetSdkVersion
+        targetSdk 34
 //        versionCode 1
 //        versionName "1.0"
 
@@ -59,7 +60,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.KotlinGeekDev'
                 artifactId = 'kostr-android'
-                version = '0.1-pre-alpha-8'
+                version = '0.1-pre-alpha-9'
                 //artifact(releaseSourcesJar)
             }
         }
