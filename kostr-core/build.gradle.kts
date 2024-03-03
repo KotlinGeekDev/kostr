@@ -29,16 +29,19 @@ kotlin {
 
 
     linuxX64("linux") {
-        compilations.all {
+//        compilations.all {
 //            cinterops {
 //                val libs by creating {
 //                    defFile("src/linuxMain/cinterop/libs.def")
 //                }
 //            }
-        }
-        binaries {
-            executable()
-        }
+//        }
+//
+//        binaries {
+//            sharedLib {
+//
+//            }
+//        }
     }
 
 
