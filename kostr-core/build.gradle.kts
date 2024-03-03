@@ -30,11 +30,11 @@ kotlin {
 
     linuxX64("linux") {
         compilations.all {
-            cinterops {
-                val libs by creating {
-                    defFile("src/linuxMain/cinterop/libs.def")
-                }
-            }
+//            cinterops {
+//                val libs by creating {
+//                    defFile("src/linuxMain/cinterop/libs.def")
+//                }
+//            }
         }
         binaries {
             executable()
@@ -100,7 +100,7 @@ kotlin {
         linuxMain.dependencies {
             implementation("io.ktor:ktor-client-cio:$ktorVersion")
             //implementation("io.ktor:ktor-client-curl:$ktorVersion")
-            implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-shared:0.2.0")
+            implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:0.2.0")
         }
 
         linuxTest.dependencies {
