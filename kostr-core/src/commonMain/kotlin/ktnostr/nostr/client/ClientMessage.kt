@@ -1,5 +1,7 @@
 package ktnostr.nostr.client
 
+import com.benasher44.uuid.bytes
+import com.benasher44.uuid.uuid4
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
@@ -90,7 +92,7 @@ data class ClientEventMessage(
 @Serializable(with = ClientMessage.MessageSerializer::class)
 data class RequestMessage(
     override val messageType: String = "REQ",
-    val subscriptionId: String,
+    val subscriptionId: String = uuid4().bytes.decodeToString().substring(0, 5),
     val filters: List<NostrFilter>?
 ) : ClientMessage(messageType)
 

@@ -1,7 +1,5 @@
 package ktnostr.net
 
-import com.benasher44.uuid.bytes
-import com.benasher44.uuid.uuidOf
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
 import kotlinx.atomicfu.atomic
@@ -14,19 +12,16 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import ktnostr.formattedDateTime
 import ktnostr.nostr.Event
-import ktnostr.nostr.NostrFilter
 import ktnostr.nostr.client.ClientEventMessage
 import ktnostr.nostr.client.ClientMessage
 import ktnostr.nostr.client.RequestMessage
 import ktnostr.nostr.deserializedEvent
 import ktnostr.nostr.eventMapper
 import ktnostr.nostr.relays.*
-import kotlin.random.Random
 
 
-class NostrService(val relayPool: RelayPool) {
-    val uuidBytes = Random.nextBytes(32)
-    val relayNoticesCount = atomic(0)
+class NostrService(private val relayPool: RelayPool) {
+    private val relayNoticesCount = atomic(0)
 
     val client = httpClient {
         install(WebSockets){
@@ -35,16 +30,8 @@ class NostrService(val relayPool: RelayPool) {
 
     }
 
-    suspend fun sendFilters(
-        subscriptionId: String = uuidOf(uuidBytes).bytes.decodeToString().substring(0, 5),
-        filters: List<NostrFilter>? = null
-    ){
-        val createdReq = RequestMessage(subscriptionId = subscriptionId, filters = filters)
-        publishEvent(createdReq)
-    }
-
-    suspend fun publishEvent(event: ClientMessage){
-        when(event){
+    suspend fun publishEvent(event: ClientMessage) {
+        when(event) {
             is ClientEventMessage -> sendEvent(event)
             is RequestMessage -> sendEvent(event)
             else -> println("Sending these types is not yet implemented.")
