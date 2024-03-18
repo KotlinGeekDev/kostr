@@ -94,7 +94,13 @@ data class RequestMessage(
     override val messageType: String = "REQ",
     val subscriptionId: String = uuid4().bytes.decodeToString().substring(0, 5),
     val filters: List<NostrFilter>?
-) : ClientMessage(messageType)
+) : ClientMessage(messageType) {
+    override fun toString() = """
+        Message type -> $messageType
+        SubscriptionId -> $subscriptionId
+        Filters -> $filters
+    """.trimIndent()
+}
 
 @Serializable(with = ClientMessage.MessageSerializer::class)
 data class CloseRequest(
