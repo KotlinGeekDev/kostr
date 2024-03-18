@@ -6,7 +6,7 @@ Note: This is still in development and very incomplete.
 
 
 ## What is Nostr?
-* The Nostr protocol specs can be found [here](https://github.com/fiatjaf/nostr)
+* The Nostr protocol specs can be found [here](https://github.com/nostr-protocol/nostr)
 
 ## How to include it
   Inside your root-level `build.gradle(.kts)` file, you should add `jitpack`:
@@ -52,7 +52,7 @@ then, in your module's `build.gradle(.kts)`, you need to add:
 // build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.AnonymousGeekDev.kostr:kostr-core:v0.1-pre-alpha-6")
+    implementation("com.github.AnonymousGeekDev.kostr:kostr-core:v1.0-beta")
 }
 
 ```
