@@ -1,6 +1,6 @@
 # Kostr
 
-The Kotlin Android/JVM library for working with Nostr.
+The Kotlin Multiplatform library for working with Nostr.
 
 Note: This is still in development and very incomplete.
 
