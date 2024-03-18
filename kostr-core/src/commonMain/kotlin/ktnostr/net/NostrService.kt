@@ -38,10 +38,6 @@ class NostrService(private val relayPool: RelayPool) {
         }
     }
 
-
-
-
-
     suspend fun sendEvent(message: ClientMessage){
         val eventJson = eventMapper.encodeToString(message)
         relayPool.getRelays().forEach {
