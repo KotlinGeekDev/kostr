@@ -15,6 +15,20 @@ class NostrFilter private constructor(
     private val until: Long? = null,
     private val limit: Int = 1
 ) {
+
+    override fun toString() = """
+        Ids:$listOfIds
+        Authors:$authorsList
+        Kinds:$listOfKinds
+        Tags
+          Id:$eventIdList
+          Pubkey:$pubkeyList
+          Topic:$topicList
+        Since:$since
+        Until:$until
+        Limit:$limit  
+    """.trimIndent()
+
     companion object {
         fun newFilter() = Builder()
     }
