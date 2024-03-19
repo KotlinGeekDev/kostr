@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 val kotlinVersion = "1.9.20"
-val ktorVersion = "2.3.2"
+val ktorVersion = "2.3.7"
 
 plugins {
     `java-library`
@@ -59,7 +59,7 @@ kotlin {
             implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
             //Crypto(Secp256k1-utils, SecureRandom, Hashing, etc.)
-            implementation("fr.acinq.secp256k1:secp256k1-kmp:0.10.1")
+            implementation("fr.acinq.secp256k1:secp256k1-kmp:0.15.0")
             implementation("dev.whyoleg.cryptography:cryptography-core:0.2.0")
             implementation("dev.whyoleg.cryptography:cryptography-random:0.2.0")
 
@@ -68,7 +68,7 @@ kotlin {
             //Coroutines
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
             //Atomics
-            implementation("org.jetbrains.kotlinx:atomicfu:0.22.0")
+            implementation("org.jetbrains.kotlinx:atomicfu:0.23.2")
             //Date-time
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
             //UUID
@@ -82,10 +82,10 @@ kotlin {
 
         jvmMain.dependencies {
             //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
-            implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.10.1")
+            implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.2.0")
 
-            implementation("com.squareup.okhttp3:okhttp:4.11.0")
+            implementation("com.squareup.okhttp3:okhttp:4.12.0")
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
         }
 
@@ -95,7 +95,7 @@ kotlin {
             implementation("org.junit.jupiter:junit-jupiter:5.8.2")
             implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
             implementation("org.assertj:assertj-core:3.23.1")
-            runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.10.1")
+            runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.15.0")
             runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
             runtimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
         }
