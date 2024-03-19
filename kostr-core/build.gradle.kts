@@ -52,6 +52,7 @@ kotlin {
             //Ktor
             implementation("io.ktor:ktor-client-core:$ktorVersion")
             implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+            implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
             //Kotlin base
             implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
@@ -87,6 +88,7 @@ kotlin {
 
             implementation("com.squareup.okhttp3:okhttp:4.12.0")
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+            implementation("ch.qos.logback:logback-classic:1.4.14")
         }
 
         jvmTest.dependencies {
