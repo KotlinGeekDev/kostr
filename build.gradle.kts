@@ -9,9 +9,9 @@ buildscript {
     dependencies {
 
         classpath(kotlin("gradle-plugin", version = kotlinVersion))
-        classpath("com.android.tools.build:gradle:8.0.2")
+        classpath("com.android.tools.build:gradle:8.2.0")
         classpath(kotlin("serialization", version = kotlinVersion))
-        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.22.0")
+        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.23.2")
         classpath("org.jetbrains.kotlin:atomicfu:$kotlinVersion")
 
     }
@@ -30,7 +30,7 @@ allprojects {
     apply(plugin = "kotlinx-atomicfu")
 
     group = "com.github.KotlinGeekDev"
-    version = "1.0-beta"
+    version = "1.0-beta-01"
 
 }
 

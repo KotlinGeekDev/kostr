@@ -34,10 +34,16 @@ class NostrFilterTest {
     fun `it serializes the nostr filter correctly`() {
         val currentTimestamp = 1653822739L
         val previousTimestamp = currentTimestamp - 24 * 60 * 60
-        val filter = NostrFilter(
-            eventIdList, authorList, listOfKinds, referencedEventIds,
-            referencedProfiles, previousTimestamp, currentTimestamp, maxEventLimit
-        )
+        val filter = NostrFilter.newFilter()
+            .idList(eventIdList)
+            .authors(authorList)
+            .kinds(listOfKinds)
+            .eventTagList(referencedEventIds)
+            .pubkeyTagList(referencedProfiles)
+            .since(previousTimestamp)
+            .until(currentTimestamp)
+            .limit(maxEventLimit)
+            .build()
 
         val correctFilterJson =
             """{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}"""
@@ -51,15 +57,27 @@ class NostrFilterTest {
 
     @Test
     fun `the timestamp for the filter is correctly generated`() {
-        val filter = NostrFilter(
-            eventIdList, authorList, listOfKinds, referencedEventIds,
-            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit
-        )
+        val filter = NostrFilter.newFilter()
+            .idList(eventIdList)
+            .authors(authorList)
+            .kinds(listOfKinds)
+            .eventTagList(referencedEventIds)
+            .pubkeyTagList(referencedProfiles)
+            .since(lowerTimeLimit)
+            .until(upperTimeLimit)
+            .limit(maxEventLimit)
+            .build()
 
-        val cloneFilter = NostrFilter(
-            eventIdList, authorList, listOfKinds, referencedEventIds,
-            referencedProfiles, lowerTimeLimit, upperTimeLimit, maxEventLimit
-        )
+        val cloneFilter = NostrFilter.newFilter()
+            .idList(eventIdList)
+            .authors(authorList)
+            .kinds(listOfKinds)
+            .eventTagList(referencedEventIds)
+            .pubkeyTagList(referencedProfiles)
+            .since(lowerTimeLimit)
+            .until(upperTimeLimit)
+            .limit(maxEventLimit)
+            .build()
 
         val filterJson = nostrFilterEventMapper.encodeToString(filter)
         val cloneFilterJson = nostrFilterEventMapper.encodeToString(cloneFilter)
@@ -75,8 +93,16 @@ class NostrFilterTest {
     fun `another test for correct serialization`(){
         val currentTimestamp = 1653822739L
         val previousTimestamp = currentTimestamp - 24 * 60 * 60
-     val textEventFilter = NostrFilter(null, null, listOf(1),
-         null, null, previousTimestamp, currentTimestamp, 30)
+        val textEventFilter = NostrFilter.newFilter()
+            .idList(null)
+            .authors(null)
+            .kinds(listOf(EventKind.TEXT_NOTE))
+            .eventTagList(null)
+            .pubkeyTagList(null)
+            .since(previousTimestamp)
+            .until(currentTimestamp)
+            .limit(30)
+            .build()
         val filterJson = nostrFilterEventMapper.encodeToString(textEventFilter)
         val correctRequestJson = """{"kinds":[1],"since":1653736339,"until":1653822739,"limit":30}"""
         println(filterJson)

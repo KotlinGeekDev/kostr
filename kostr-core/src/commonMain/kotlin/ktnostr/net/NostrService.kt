@@ -1,59 +1,44 @@
 package ktnostr.net
 
-import com.benasher44.uuid.bytes
-import com.benasher44.uuid.uuidOf
+import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.websocket.*
+import io.ktor.utils.io.errors.*
 import io.ktor.websocket.*
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.consumeAsFlow
-import kotlinx.coroutines.joinAll
-import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import ktnostr.formattedDateTime
 import ktnostr.nostr.Event
-import ktnostr.nostr.NostrFilter
 import ktnostr.nostr.client.ClientEventMessage
 import ktnostr.nostr.client.ClientMessage
 import ktnostr.nostr.client.RequestMessage
 import ktnostr.nostr.deserializedEvent
 import ktnostr.nostr.eventMapper
 import ktnostr.nostr.relays.*
-import kotlin.random.Random
 
 
-class NostrService(val relayPool: RelayPool) {
-    val uuidBytes = Random.nextBytes(32)
-    val relayNoticesCount = atomic(0)
+class NostrService(private val relayPool: RelayPool) {
+    private val relayNoticesCount = atomic(0)
 
     val client = httpClient {
         install(WebSockets){
 
         }
+        install(Logging){
+
+        }
 
     }
 
-    suspend fun sendFilters(
-        subscriptionId: String = uuidOf(uuidBytes).bytes.decodeToString().substring(0, 5),
-        filters: List<NostrFilter>? = null
-    ){
-        val createdReq = RequestMessage(subscriptionId = subscriptionId, filters = filters)
-        publishEvent(createdReq)
-    }
-
-    suspend fun publishEvent(event: ClientMessage){
-        when(event){
+    suspend fun publishEvent(event: ClientMessage) {
+        when(event) {
             is ClientEventMessage -> sendEvent(event)
             is RequestMessage -> sendEvent(event)
             else -> println("Sending these types is not yet implemented.")
         }
     }
-
-
-
-
 
     suspend fun sendEvent(message: ClientMessage){
         val eventJson = eventMapper.encodeToString(message)
@@ -66,41 +51,46 @@ class NostrService(val relayPool: RelayPool) {
     suspend fun request(requestMessage: RequestMessage,
                         onReceivedEvent: (Relay, Event) -> Unit,
                         onRelayNotice: (Relay, RelayNotice) -> Unit,
-                     //   onError: (Exception) -> Unit
-    ){
+                        onError: (Throwable) -> Unit
+    ) {
         val requestJson = eventMapper.encodeToString(requestMessage)
         coroutineScope {
             for (relay in relayPool.getRelays()) {
-                launch {
-                    client.webSocket(urlString = relay.relayURI) {
-                        send(requestJson)
+                launch relayScope@{
+                    println("Coroutine Scope @ ${relay.relayURI}")
+                    try {
+                        client.webSocket(urlString = relay.relayURI) {
+                            send(requestJson)
 
-                        for (frame in incoming){
-                            val received = (frame as Frame.Text).readText()
-                            //println(received)
+                            for (frame in incoming) {
+                                val received = (frame as Frame.Text).readText()
+                                val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
 
-                            val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
+                                when(receivedMessage){
+                                    is RelayEventMessage -> {
+                                        val event = deserializedEvent(receivedMessage.eventJson)
+                                        onReceivedEvent(relay, event)
+                                    }
 
-                            when(receivedMessage){
-                                is RelayEventMessage -> {
-                                    val event = deserializedEvent(receivedMessage.eventJson)
-                                    onReceivedEvent(relay, event)
+                                    is RelayNotice -> {
+                                        onRelayNotice(relay, receivedMessage)
 
+                                    }
                                 }
-                                is RelayNotice -> {
-                                    onRelayNotice(relay, receivedMessage)
-
-                                }
-
                             }
                         }
-
+                    } catch (e: IOException) {
+                        onError(e)
+                        println("Terminating connection to ${relay.relayURI}...")
+                        if (isActive) this@relayScope.cancel()
+                    } catch (err: Exception) {
+                        onError(err)
+                    } catch (t: Throwable) {
+                        onError(t)
                     }
                 }
-
             }
         }
-
     }
 
     suspend fun requestWithResult(requestMessage: RequestMessage): Result<List<Event>>? {
