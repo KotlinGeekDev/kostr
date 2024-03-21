@@ -30,7 +30,7 @@ allprojects {
     apply(plugin = "kotlinx-atomicfu")
 
     group = "com.github.KotlinGeekDev"
-    version = "0.1-pre-alpha-9"
+    version = "1.0-beta-01"
 
 }
 
