@@ -44,6 +44,13 @@ kotlin {
 //        }
     }
 
+    //Apple targets
+    macosX64()
+    macosArm64()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
 
     applyDefaultHierarchyTemplate()
 
@@ -111,6 +118,13 @@ kotlin {
         linuxTest.dependencies {
 
         }
+
+        appleMain.dependencies {
+            implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+            implementation("dev.whyoleg.cryptography:cryptography-provider-apple:0.2.0")
+        }
+        macosMain.get().dependsOn(appleMain.get())
+        iosMain.get().dependsOn(appleMain.get())
 
     }
 }
