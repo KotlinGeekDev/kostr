@@ -1,35 +1,4 @@
 
-Skip to content
-Pull requests
-Issues
-Marketplace
-Explore
-@AnonymousGeekDev
-appmattus /
-certificatetransparency
-Public
-
-Code
-Issues 4
-Pull requests
-Actions
-Projects 2
-Security
-
-    Insights
-
-certificatetransparency/.gitignore
-@mattmook
-mattmook Move logclient code into its own module
-Latest commit 8b0701a on Feb 24, 2021
-History
-2 contributors
-@mattmook
-@Rosomack
-301 lines (222 sloc) 5.56 KB
-# Created by https://www.toptal.com/developers/gitignore/api/android,androidstudio,xcode,swift,kotlin
-# Edit at https://www.toptal.com/developers/gitignore?templates=android,androidstudio,xcode,swift,kotlin
-
 ### Android ###
 # Built application files
 *.apk
@@ -115,6 +84,7 @@ output.json
 # with Android Studio 3.5.
 
 ### Kotlin ###
+.kotlin/
 # Compiled class file
 
 # Log file

@@ -1,7 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
-val kotlinVersion = "1.9.20"
-val ktorVersion = "2.3.7"
+val kotlinVersion = "2.0.0"
+val ktorVersion = "2.3.10"
+val kotlinCryptoVersion = "0.3.1"
+val junitJupiterVersion = "5.10.1"
 
 plugins {
     `java-library`
@@ -11,14 +14,12 @@ plugins {
 }
 
 
-
 kotlin {
     //explicitApi()
 
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "17"
-        }
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
             testLogging {
@@ -68,19 +69,19 @@ kotlin {
 
             //Crypto(Secp256k1-utils, SecureRandom, Hashing, etc.)
             implementation("fr.acinq.secp256k1:secp256k1-kmp:0.15.0")
-            implementation("dev.whyoleg.cryptography:cryptography-core:0.2.0")
-            implementation("dev.whyoleg.cryptography:cryptography-random:0.2.0")
+            implementation("dev.whyoleg.cryptography:cryptography-core:$kotlinCryptoVersion")
+            implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
 
             //Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             //Coroutines
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
             //Atomics
-            implementation("org.jetbrains.kotlinx:atomicfu:0.23.2")
+            implementation("org.jetbrains.kotlinx:atomicfu:0.25.0")
             //Date-time
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
             //UUID
-            implementation("com.benasher44:uuid:0.8.0")
+            implementation("com.benasher44:uuid:0.8.4")
         }
 
         commonTest.dependencies {
@@ -91,7 +92,7 @@ kotlin {
         jvmMain.dependencies {
             //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
             implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
-            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:0.2.0")
+            implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 
             implementation("com.squareup.okhttp3:okhttp:4.12.0")
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
@@ -101,18 +102,18 @@ kotlin {
         jvmTest.dependencies {
             implementation(kotlin("test-junit5"))
 
-            implementation("org.junit.jupiter:junit-jupiter:5.8.2")
-            implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+            implementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+            implementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
             implementation("org.assertj:assertj-core:3.23.1")
             runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.15.0")
-            runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-            runtimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+            runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+            runtimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion")
         }
 
         linuxMain.dependencies {
             implementation("io.ktor:ktor-client-cio:$ktorVersion")
             //implementation("io.ktor:ktor-client-curl:$ktorVersion")
-            implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:0.2.0")
+            implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:$kotlinCryptoVersion")
         }
 
         linuxTest.dependencies {
@@ -121,7 +122,7 @@ kotlin {
 
         appleMain.dependencies {
             implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-            implementation("dev.whyoleg.cryptography:cryptography-provider-apple:0.2.0")
+            implementation("dev.whyoleg.cryptography:cryptography-provider-apple:$kotlinCryptoVersion")
         }
         macosMain.get().dependsOn(appleMain.get())
         iosMain.get().dependsOn(appleMain.get())
@@ -130,7 +131,9 @@ kotlin {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "17"
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
 }
 
 tasks.withType<KotlinNativeCompile>().configureEach {
