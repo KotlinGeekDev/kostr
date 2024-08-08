@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 val kotlinVersion = "2.0.0"
@@ -16,9 +17,8 @@ kotlin {
     //explicitApi()
 
     jvm {
-        compilations.all {
-            kotlinOptions.jvmTarget = "17"
-        }
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
             testLogging {
@@ -130,7 +130,9 @@ kotlin {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
-    kotlinOptions.jvmTarget = "17"
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_17
+    }
 }
 
 tasks.withType<KotlinNativeCompile>().configureEach {
