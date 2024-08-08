@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 val kotlinVersion = "2.0.0"
 val ktorVersion = "2.3.10"
 val kotlinCryptoVersion = "0.3.1"
+val junitJupiterVersion = "5.10.1"
 
 plugins {
     `java-library`
@@ -11,7 +12,6 @@ plugins {
     kotlin("plugin.serialization")
     `maven-publish`
 }
-
 
 
 kotlin {
@@ -102,12 +102,12 @@ kotlin {
         jvmTest.dependencies {
             implementation(kotlin("test-junit5"))
 
-            implementation("org.junit.jupiter:junit-jupiter:5.8.2")
-            implementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+            implementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+            implementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
             implementation("org.assertj:assertj-core:3.23.1")
             runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.15.0")
-            runtimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-            runtimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+            runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+            runtimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion")
         }
 
         linuxMain.dependencies {
