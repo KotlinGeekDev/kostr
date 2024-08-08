@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
-val kotlinVersion = "1.9.20"
+val kotlinVersion = "2.0.0"
 val ktorVersion = "2.3.7"
 
 plugins {
