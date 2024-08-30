@@ -59,7 +59,7 @@ class NostrService(private val relayPool: RelayPool) {
         onReceivedEvent: (Relay, Event) -> Unit,
         onEose: (Relay, RelayEose) -> Unit,
         onRelayNotice: (Relay, RelayNotice) -> Unit,
-        onError: (Throwable) -> Unit
+        onError: (Relay, Throwable) -> Unit
     ) {
         val requestJson = eventMapper.encodeToString(requestMessage)
         coroutineScope {
@@ -88,6 +88,10 @@ class NostrService(private val relayPool: RelayPool) {
                                         onEose(relay, receivedMessage)
                                     }
 
+                                    is CloseMessage -> {
+                                        onError(relay, Exception(receivedMessage.errorMessage))
+                                    }
+
                                     is RelayNotice -> {
                                         onRelayNotice(relay, receivedMessage)
                                     }
@@ -95,13 +99,13 @@ class NostrService(private val relayPool: RelayPool) {
                             }
                         }
                     } catch (e: IOException) {
-                        onError(e)
+                        onError(relay, e)
                         println("Terminating connection to ${relay.relayURI}...")
                         if (isActive) this@relayScope.cancel()
                     } catch (err: Exception) {
-                        onError(err)
+                        onError(relay, err)
                     } catch (t: Throwable) {
-                        onError(t)
+                        onError(relay, t)
                     }
                 }
             }
@@ -154,6 +158,11 @@ class NostrService(private val relayPool: RelayPool) {
                                     println("**List count: ${relayPool.getRelays().size}")
                                     println("**EOSE count: ${relayEoseCount.value}")
                                     println("************--")
+                                }
+
+                                is CloseMessage -> {
+                                    relayEoseCount.update { it + 1 }
+                                    println("Closed by Relay ${relay.relayURI} with reason: ${receivedMessage.errorMessage}")
                                 }
 
                                 is RelayNotice -> {

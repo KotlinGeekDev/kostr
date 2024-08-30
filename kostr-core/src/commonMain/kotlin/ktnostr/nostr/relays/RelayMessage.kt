@@ -37,10 +37,17 @@ sealed class RelayMessage(){
             return when (messageJsonArray.size) {
                 3 -> {
                     val messageMarker = messageJsonArray[0].jsonPrimitive.content
-                    val subscriptionId = messageJsonArray[1].jsonPrimitive.content
-                    val eventJsonNode = messageJsonArray[2]
-                    val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
-                    RelayEventMessage(messageMarker, subscriptionId, eventJson)
+                    if (messageMarker.contentEquals("EVENT")){
+                        val subscriptionId = messageJsonArray[1].jsonPrimitive.content
+                        val eventJsonNode = messageJsonArray[2]
+                        val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
+                        RelayEventMessage(messageMarker, subscriptionId, eventJson)
+                    }
+                    else {
+                        val subscriptionId = messageJsonArray[1].jsonPrimitive.content
+                        val errorMessage = messageJsonArray[2].jsonPrimitive.content
+                        CloseMessage(messageMarker, subscriptionId, errorMessage)
+                    }
                 }
                 4 -> {
                     val messageMarker = messageJsonArray[0].jsonPrimitive.content
@@ -94,6 +101,14 @@ sealed class RelayMessage(){
                         add(messageTypeMarker)
                         add(subscriptionId)
                     }
+                    is CloseMessage -> {
+                        val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
+                        val subscriptionId = messageEncoder.encodeToJsonElement(value.subscriptionId)
+                        val errorMessage = messageEncoder.encodeToJsonElement(value.errorMessage)
+                        add(messageTypeMarker)
+                        add(subscriptionId)
+                        add(errorMessage)
+                    }
                     is RelayNotice -> {
                         val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
                         val contentMarker = messageEncoder.encodeToJsonElement(value.message)
@@ -144,6 +159,17 @@ data class EventStatus(
 data class RelayEose(
     val messageType: String = "EOSE",
     val subscriptionId: String
+): RelayMessage()
+
+/**
+ * This is sent by the relay without an explicit signal to
+ * close the connection, or disconnection from the relay.
+ * The response is of the form [[CLOSED, subscription, error]].
+ */
+data class CloseMessage(
+    val messageType: String = "CLOSED",
+    val subscriptionId: String,
+    val errorMessage: String
 ): RelayMessage()
 
 /**
