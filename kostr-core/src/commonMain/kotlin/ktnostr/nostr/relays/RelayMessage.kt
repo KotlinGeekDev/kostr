@@ -30,7 +30,8 @@ sealed class RelayMessage(){
         override fun deserialize(decoder: Decoder): RelayMessage {
             val jsonMessageDecoder = decoder as JsonDecoder
             val messageJsonArray = jsonMessageDecoder.decodeJsonElement().jsonArray
-            if (messageJsonArray.size > 3 || messageJsonArray.size < 2){
+            if (messageJsonArray.size > 4 || messageJsonArray.size < 2){
+                println("Cannot decode JSON -> $messageJsonArray")
                 throw SerializationException("Message type is not supported for message $messageJsonArray")
             }
             return if (messageJsonArray.size == 3){
@@ -39,7 +40,15 @@ sealed class RelayMessage(){
                 val eventJsonNode = messageJsonArray[2]
                 val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
                 RelayEventMessage(messageMarker, subscriptionId, eventJson)
-            } else {
+            }
+            else if (messageJsonArray.size == 4){
+                val messageMarker = messageJsonArray[0].jsonPrimitive.content
+                val eventId = messageJsonArray[1].jsonPrimitive.content
+                val acceptedStatus = messageJsonArray[2].jsonPrimitive.boolean
+                val additionalInfo = messageJsonArray[3].jsonPrimitive.content
+                EventStatus(messageMarker, eventId, acceptedStatus, additionalInfo)
+            }
+            else {
                 val noticeMarker = messageJsonArray[0].jsonPrimitive.content
                 val noticeMessage = messageJsonArray[1].jsonPrimitive.content
                 RelayNotice(noticeMarker, noticeMessage)
@@ -57,6 +66,16 @@ sealed class RelayMessage(){
                         add(messageTypeMarker)
                         add(subscriptionMarker)
                         add(eventJsonMarker)
+                    }
+                    is EventStatus -> {
+                        val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
+                        val eventId = messageEncoder.encodeToJsonElement(value.eventId)
+                        val acceptStatus = messageEncoder.encodeToJsonElement(value.accepted)
+                        val additionalInfo = messageEncoder.encodeToJsonElement(value.additionalInfo)
+                        add(messageTypeMarker)
+                        add(eventId)
+                        add(acceptStatus)
+                        add(additionalInfo)
                     }
                     is RelayNotice -> {
                         val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
@@ -86,6 +105,17 @@ data class RelayEventMessage(
     val subscriptionId: String,
     val eventJson: String
 ) : RelayMessage()
+
+/**
+ * Represents the relay response to an event being sent to it.
+ * It is of the form [[OK, event-id, <true|false>, message]].
+ */
+data class EventStatus(
+    val messageType: String = "OK",
+    val eventId: String,
+    val accepted: Boolean,
+    val additionalInfo: String
+): RelayMessage()
 
 /**
  * The model representing the case when the relay returns a message different from the normal response.

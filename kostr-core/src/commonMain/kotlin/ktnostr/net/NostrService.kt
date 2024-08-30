@@ -42,7 +42,14 @@ class NostrService(private val relayPool: RelayPool) {
     suspend fun sendEvent(message: ClientMessage){
         val eventJson = eventMapper.encodeToString(message)
         relayPool.getRelays().forEach {
-            client.webSocketSession(it.relayURI).send(eventJson)
+            client.webSocket(it.relayURI){
+                send(eventJson)
+                for (frame in incoming){
+                    val messageJson = (frame as Frame.Text).readText()
+                    val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
+
+                }
+            }
         }
         client.close()
     }
@@ -70,6 +77,11 @@ class NostrService(private val relayPool: RelayPool) {
                                     is RelayEventMessage -> {
                                         val event = deserializedEvent(receivedMessage.eventJson)
                                         onReceivedEvent(relay, event)
+                                    }
+
+                                    is EventStatus -> {
+                                        println("Received a status for the sent event:")
+                                        println(receivedMessage)
                                     }
 
                                     is RelayNotice -> {
@@ -117,6 +129,11 @@ class NostrService(private val relayPool: RelayPool) {
                                     println("Event created on ${formattedDateTime(event.creationDate)}")
                                     println(event.content)
                                     eventResultList.add(event)
+                                }
+
+                                is EventStatus -> {
+                                    println("Received a status for the sent event:")
+                                    println(receivedMessage)
                                 }
 
                                 is RelayNotice -> {
