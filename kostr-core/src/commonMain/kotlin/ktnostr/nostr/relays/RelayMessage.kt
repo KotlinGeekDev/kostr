@@ -140,6 +140,11 @@ data class RelayEventMessage(
 
 /**
  * Represents the relay response to an event being sent to it.
+ * It acts as a confirmation signal for client that the relay
+ * has accepted(or rejected) the event, as indicated by the
+ * 'accepted' field we use here.
+ * In the case of rejection, the reason is provided in the
+ * response.
  * It is of the form [[OK, event-id, <true|false>, message]].
  */
 data class EventStatus(
@@ -155,6 +160,7 @@ data class EventStatus(
  * your request.
  * However, it will continue to send new data matching your
  * filters in realtime as they are received.
+ * The response is of the form [[EOSE, subscription]].
  */
 data class RelayEose(
     val messageType: String = "EOSE",
