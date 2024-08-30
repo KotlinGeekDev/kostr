@@ -31,27 +31,38 @@ sealed class RelayMessage(){
             val jsonMessageDecoder = decoder as JsonDecoder
             val messageJsonArray = jsonMessageDecoder.decodeJsonElement().jsonArray
             if (messageJsonArray.size > 4 || messageJsonArray.size < 2){
-                println("Cannot decode JSON -> $messageJsonArray")
-                throw SerializationException("Message type is not supported for message $messageJsonArray")
+                println("Unknown JSON -> $messageJsonArray")
+                throw SerializationException("Message type is not supported for message: $messageJsonArray")
             }
-            return if (messageJsonArray.size == 3){
-                val messageMarker = messageJsonArray[0].jsonPrimitive.content
-                val subscriptionId = messageJsonArray[1].jsonPrimitive.content
-                val eventJsonNode = messageJsonArray[2]
-                val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
-                RelayEventMessage(messageMarker, subscriptionId, eventJson)
-            }
-            else if (messageJsonArray.size == 4){
-                val messageMarker = messageJsonArray[0].jsonPrimitive.content
-                val eventId = messageJsonArray[1].jsonPrimitive.content
-                val acceptedStatus = messageJsonArray[2].jsonPrimitive.boolean
-                val additionalInfo = messageJsonArray[3].jsonPrimitive.content
-                EventStatus(messageMarker, eventId, acceptedStatus, additionalInfo)
-            }
-            else {
-                val noticeMarker = messageJsonArray[0].jsonPrimitive.content
-                val noticeMessage = messageJsonArray[1].jsonPrimitive.content
-                RelayNotice(noticeMarker, noticeMessage)
+            return when (messageJsonArray.size) {
+                3 -> {
+                    val messageMarker = messageJsonArray[0].jsonPrimitive.content
+                    val subscriptionId = messageJsonArray[1].jsonPrimitive.content
+                    val eventJsonNode = messageJsonArray[2]
+                    val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
+                    RelayEventMessage(messageMarker, subscriptionId, eventJson)
+                }
+                4 -> {
+                    val messageMarker = messageJsonArray[0].jsonPrimitive.content
+                    val eventId = messageJsonArray[1].jsonPrimitive.content
+                    val acceptedStatus = messageJsonArray[2].jsonPrimitive.boolean
+                    val additionalInfo = messageJsonArray[3].jsonPrimitive.content
+                    EventStatus(messageMarker, eventId, acceptedStatus, additionalInfo)
+                }
+                else -> {
+                    val messageMarker = messageJsonArray[0].jsonPrimitive.content
+                    if (messageMarker.contentEquals("EOSE")){
+                        val subscriptionId = messageJsonArray[1].jsonPrimitive.content
+                        RelayEose(messageMarker, subscriptionId)
+                    }
+                    else if (messageMarker.contentEquals("NOTICE")){
+                        val noticeMessage = messageJsonArray[1].jsonPrimitive.content
+                        RelayNotice(messageMarker, noticeMessage)
+                    }
+                    else {
+                        throw SerializationException("Unrecognized message: $messageJsonArray")
+                    }
+                }
             }
         }
 
@@ -76,6 +87,12 @@ sealed class RelayMessage(){
                         add(eventId)
                         add(acceptStatus)
                         add(additionalInfo)
+                    }
+                    is RelayEose -> {
+                        val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
+                        val subscriptionId = messageEncoder.encodeToJsonElement(value.subscriptionId)
+                        add(messageTypeMarker)
+                        add(subscriptionId)
                     }
                     is RelayNotice -> {
                         val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
@@ -115,6 +132,18 @@ data class EventStatus(
     val eventId: String,
     val accepted: Boolean,
     val additionalInfo: String
+): RelayMessage()
+
+/**
+ * This is the message the relay sends when it finishes
+ * sending all the data it has, according to the filters in
+ * your request.
+ * However, it will continue to send new data matching your
+ * filters in realtime as they are received.
+ */
+data class RelayEose(
+    val messageType: String = "EOSE",
+    val subscriptionId: String
 ): RelayMessage()
 
 /**

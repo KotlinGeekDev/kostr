@@ -19,7 +19,7 @@ import ktnostr.nostr.relays.*
 
 
 class NostrService(private val relayPool: RelayPool) {
-    private val relayNoticesCount = atomic(0)
+    private val relayEoseCount = atomic(0)
 
     private val client = httpClient {
         install(WebSockets){
@@ -57,6 +57,7 @@ class NostrService(private val relayPool: RelayPool) {
     suspend fun request(
         requestMessage: RequestMessage,
         onReceivedEvent: (Relay, Event) -> Unit,
+        onEose: (Relay, RelayEose) -> Unit,
         onRelayNotice: (Relay, RelayNotice) -> Unit,
         onError: (Throwable) -> Unit
     ) {
@@ -80,13 +81,15 @@ class NostrService(private val relayPool: RelayPool) {
                                     }
 
                                     is EventStatus -> {
-                                        println("Received a status for the sent event:")
-                                        println(receivedMessage)
+                                        println("Received a status for the sent event: \n $receivedMessage")
+                                    }
+
+                                    is RelayEose -> {
+                                        onEose(relay, receivedMessage)
                                     }
 
                                     is RelayNotice -> {
                                         onRelayNotice(relay, receivedMessage)
-
                                     }
                                 }
                             }
@@ -136,21 +139,25 @@ class NostrService(private val relayPool: RelayPool) {
                                     println(receivedMessage)
                                 }
 
-                                is RelayNotice -> {
-                                    if (relayNoticesCount.value == relayPool.getRelays().size){
+                                is RelayEose -> {
+                                    if (relayEoseCount.value == relayPool.getRelays().size){
                                         close()
                                         if (eventResultList.isNotEmpty())
                                             returnedResult = Result.success(eventResultList.toList())
 
                                     } else {
-                                        relayNoticesCount.update { it + 1 }
-                                        println("Relay notice received from ${relay.relayURI} with index $index")
+                                        relayEoseCount.update { it + 1 }
+                                        println("Relay EOSE received from ${relay.relayURI} with index $index")
                                         println(receivedMessage)
                                     }
                                     println("***********--")
                                     println("**List count: ${relayPool.getRelays().size}")
-                                    println("**Notice count: ${relayNoticesCount.value}")
+                                    println("**EOSE count: ${relayEoseCount.value}")
                                     println("************--")
+                                }
+
+                                is RelayNotice -> {
+                                    println("Received a relay notice: $receivedMessage")
                                 }
                             }
                         }
@@ -160,12 +167,12 @@ class NostrService(private val relayPool: RelayPool) {
                     if (e.message?.contains("Failed to connect") == true) {
                         relayPool.removeRelay(relay)
                     }
-                    relayNoticesCount.update { it + 1 }
+                    relayEoseCount.update { it + 1 }
                     println("***********--")
                     println("**List count: ${relayPool.getRelays().size}")
-                    println("**Notice count: ${relayNoticesCount.value}")
+                    println("**EOSE count: ${relayEoseCount.value}")
                     println("************--")
-                    if (relayNoticesCount.value == relayPool.getRelays().size){
+                    if (relayEoseCount.value == relayPool.getRelays().size){
                         println("Terminating...")
                         client.cancel()
                         if (eventResultList.isNotEmpty())
