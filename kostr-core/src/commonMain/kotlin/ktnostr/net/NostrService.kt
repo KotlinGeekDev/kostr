@@ -8,6 +8,8 @@ import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import ktnostr.formattedDateTime
 import ktnostr.nostr.Event
@@ -20,6 +22,7 @@ import ktnostr.nostr.relays.*
 
 class NostrService(private val relayPool: RelayPool) {
     private val relayEoseCount = atomic(0)
+    private val serviceMutex = Mutex()
 
     private val client = httpClient {
         install(WebSockets){
@@ -57,6 +60,7 @@ class NostrService(private val relayPool: RelayPool) {
     suspend fun request(
         requestMessage: RequestMessage,
         onReceivedEvent: (Relay, Event) -> Unit,
+        onAuthRequest: (Relay, RelayAuthMessage) -> Unit,
         onEose: (Relay, RelayEose) -> Unit,
         onRelayNotice: (Relay, RelayNotice) -> Unit,
         onError: (Relay, Throwable) -> Unit
@@ -78,6 +82,11 @@ class NostrService(private val relayPool: RelayPool) {
                                     is RelayEventMessage -> {
                                         val event = deserializedEvent(receivedMessage.eventJson)
                                         onReceivedEvent(relay, event)
+                                    }
+
+                                    is RelayAuthMessage -> {
+                                        println("Received Auth message: $receivedMessage")
+                                        onAuthRequest(relay, receivedMessage)
                                     }
 
                                     is EventStatus -> {
@@ -118,6 +127,7 @@ class NostrService(private val relayPool: RelayPool) {
         relayList: List<Relay> = relayPool.getRelays()
     ): Result<List<Event>> {
         val requestJson = eventMapper.encodeToString(requestMessage)
+        val relayAuthCache: MutableMap<Relay, RelayAuthMessage> = mutableMapOf()
         val eventResultList = emptyList<Event>().toMutableList()
         var returnedResult: Result<List<Event>> = Result.failure(Exception("Empty list"))
         val connections = relayList.mapIndexed { index: Int, relay: Relay ->
@@ -136,6 +146,15 @@ class NostrService(private val relayPool: RelayPool) {
                                     println("Event created on ${formattedDateTime(event.creationDate)}")
                                     println(event.content)
                                     eventResultList.add(event)
+                                }
+
+                                is RelayAuthMessage -> {
+                                    println("Received Auth message: $receivedMessage")
+                                    serviceMutex.withLock {
+                                        if (relayAuthCache.put(relay, receivedMessage) != null){
+                                            println("Added auth message <-$receivedMessage-> to cache.")
+                                        }
+                                    }
                                 }
 
                                 is EventStatus -> {
