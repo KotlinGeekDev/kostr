@@ -17,7 +17,7 @@ import ktnostr.nostr.client.ClientMessage
 import ktnostr.nostr.client.RequestMessage
 import ktnostr.nostr.deserializedEvent
 import ktnostr.nostr.eventMapper
-import ktnostr.nostr.relays.*
+import ktnostr.nostr.relay.*
 
 
 class NostrService(private val relayPool: RelayPool) {

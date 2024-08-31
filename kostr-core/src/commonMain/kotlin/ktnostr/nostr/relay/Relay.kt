@@ -1,4 +1,4 @@
-package ktnostr.nostr.relays
+package ktnostr.nostr.relay
 
 class Relay(
     val relayURI: String,

@@ -1,4 +1,4 @@
-package ktnostr.nostr.relays
+package ktnostr.nostr.relay
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

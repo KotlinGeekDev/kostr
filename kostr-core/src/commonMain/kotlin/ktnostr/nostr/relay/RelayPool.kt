@@ -1,4 +1,4 @@
-package ktnostr.nostr.relays
+package ktnostr.nostr.relay
 
 import ktnostr.nostr.RelayError
 import kotlin.jvm.JvmStatic

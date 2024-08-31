@@ -1,6 +1,6 @@
 
 
-package ktnostr.nostr.relays
+package ktnostr.nostr.relay
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
