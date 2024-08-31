@@ -66,6 +66,10 @@ sealed class RelayMessage(){
                         val noticeMessage = messageJsonArray[1].jsonPrimitive.content
                         RelayNotice(messageMarker, noticeMessage)
                     }
+                    else if (messageMarker.contentEquals("AUTH")){
+                        val challengeString = messageJsonArray[1].jsonPrimitive.content
+                        RelayAuthMessage(messageMarker, challengeString)
+                    }
                     else {
                         throw SerializationException("Unrecognized message: $messageJsonArray")
                     }
@@ -84,6 +88,12 @@ sealed class RelayMessage(){
                         add(messageTypeMarker)
                         add(subscriptionMarker)
                         add(eventJsonMarker)
+                    }
+                    is RelayAuthMessage -> {
+                        val messageTag = messageEncoder.encodeToJsonElement(value.messageType)
+                        val challengeString = messageEncoder.encodeToJsonElement(value.challenge)
+                        add(messageTag)
+                        add(challengeString)
                     }
                     is EventStatus -> {
                         val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
@@ -137,6 +147,11 @@ data class RelayEventMessage(
     val subscriptionId: String,
     val eventJson: String
 ) : RelayMessage()
+
+data class RelayAuthMessage(
+    val messageType: String = "AUTH",
+    val challenge: String
+): RelayMessage()
 
 /**
  * Represents the relay response to an event being sent to it.
