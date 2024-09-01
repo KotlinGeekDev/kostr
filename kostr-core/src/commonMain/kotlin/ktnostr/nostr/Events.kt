@@ -42,7 +42,7 @@ object Events {
                       pubkey: String,
                       timeStamp: Long = currentSystemTimestamp(),
                       tags: List<Tag> = emptyList(),
-                      kind: Int = EventKind.METADATA, profile: String): Event {
+                      kind: Int = EventKind.METADATA.kind, profile: String): Event {
 
         return generateEvent(kind, tags, profile, privkey, pubkey, timeStamp)
     }
@@ -51,7 +51,7 @@ object Events {
     fun TextEvent(privkey: String, pubkey: String,
                   tags: List<Tag> = emptyList(),
                   timeStamp: Long = currentSystemTimestamp(),
-                  kind: Int = EventKind.TEXT_NOTE, content: String): Event {
+                  kind: Int = EventKind.TEXT_NOTE.kind, content: String): Event {
         return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
@@ -59,7 +59,7 @@ object Events {
     fun RelayRecommendationEvent(privkey: String, pubkey: String,
                                  tags: List<Tag> = emptyList(),
                                  timeStamp: Long = currentSystemTimestamp(),
-                                 kind: Int = EventKind.RELAY_RECOMMENDATION,
+                                 kind: Int = EventKind.RELAY_RECOMMENDATION.kind,
                                  content: String): Event {
         if (!(content.startsWith("wss") || content.startsWith("ws"))) {
             throw EventValidationError("Content $content is not a valid relay URL.")
@@ -71,7 +71,7 @@ object Events {
     fun FollowEvent(privkey: String, pubkey: String,
                     tags: List<Tag>,
                     timeStamp: Long = currentSystemTimestamp(),
-                    kind: Int = EventKind.CONTACT_LIST,
+                    kind: Int = EventKind.CONTACT_LIST.kind,
                     content: String): Event {
         return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
@@ -80,7 +80,7 @@ object Events {
     fun DirectMessageEvent(privkey: String, pubkey: String,
                            tags: List<Tag> = emptyList(),
                            timeStamp: Long = currentSystemTimestamp(),
-                           kind: Int = EventKind.ENCRYPTED_DM,
+                           kind: Int = EventKind.ENCRYPTED_DM.kind,
                            content: String): Event {
         return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
@@ -89,7 +89,7 @@ object Events {
     fun DeletionEvent(privkey: String, pubkey: String,
                       tags: List<Tag> = emptyList(),
                       timeStamp: Long = currentSystemTimestamp(),
-                      kind: Int = EventKind.MARKED_FOR_DELETION,
+                      kind: Int = EventKind.MARKED_FOR_DELETION.kind,
                       content: String): Event {
         return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }

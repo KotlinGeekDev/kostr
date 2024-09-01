@@ -8,7 +8,6 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import ktnostr.crypto.CryptoUtils
 import ktnostr.crypto.toHexString
-import kotlin.jvm.JvmStatic
 
 /**
  * The Event class representing the Nostr Event.
@@ -107,41 +106,36 @@ internal fun rawEventJson0(
  * This object represents the various event kinds
  * currently used on Nostr. Not all are supported, though.
  */
-object EventKind {
+enum class EventKind(val kind: Int) {
     /**
      * Represents profile creation and modification on Nostr.
      */
-    const val METADATA = 0
+    METADATA(0),
 
     /**
      * Represents published notes or posts or 'tweets'.
      */
-    const val TEXT_NOTE = 1
+    TEXT_NOTE(1),
 
     /**
      * Represents relay recommendations, for sharing relays. For helping with censorship-resistance.
      */
-    const val RELAY_RECOMMENDATION = 2
+    RELAY_RECOMMENDATION(2),
 
     /**
      * Represents contact lists, for sharing profiles, and (probably) building
      * friend lists.
      */
-    const val CONTACT_LIST = 3
+    CONTACT_LIST(3),
 
     /**
      * Represents encrypted messages.
      */
-    const val ENCRYPTED_DM = 4
+    ENCRYPTED_DM(4),
 
     /**
      * Represents posts marked for deletion.
      */
-    const val MARKED_FOR_DELETION = 5
+    MARKED_FOR_DELETION(5),
 
-    @JvmStatic
-    fun EventKind.values(): List<Int> = listOf(
-        METADATA, TEXT_NOTE, RELAY_RECOMMENDATION,
-        CONTACT_LIST, ENCRYPTED_DM, MARKED_FOR_DELETION
-    )
 }

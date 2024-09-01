@@ -40,7 +40,7 @@ class EventTests {
         val pubKeyHex = "8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f"
 
         val profileEvent = Events.MetadataEvent(secKeyHex, pubKeyHex, profile = "Name.", timeStamp = 1640839235)
-        val correspondingEvent = Events.generateEvent(EventKind.METADATA, emptyList(),
+        val correspondingEvent = Events.generateEvent(EventKind.METADATA.kind, emptyList(),
             "Name.", secKeyHex, pubKeyHex, timeStamp = 1640839235)
         println("Profile Ev: $profileEvent")
         println("Corr. Ev: $correspondingEvent")
