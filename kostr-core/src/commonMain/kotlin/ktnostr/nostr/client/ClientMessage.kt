@@ -84,7 +84,13 @@ sealed class ClientMessage(open val messageType: String){
 }
 
 @Serializable(with = ClientMessage.MessageSerializer::class)
-data class ClientEventMessage(
+data class ClientAuthMessage(
+    override val messageType: String = "AUTH",
+    val authEvent: Event
+): ClientEventMessage(messageType, authEvent)
+
+@Serializable(with = ClientMessage.MessageSerializer::class)
+open class ClientEventMessage(
     override val messageType: String = "EVENT",
     val event: Event
 ) : ClientMessage(messageType)

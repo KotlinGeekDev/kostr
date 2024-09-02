@@ -138,4 +138,9 @@ enum class EventKind(val kind: Int) {
      */
     MARKED_FOR_DELETION(5),
 
+    /**
+     * This is used for auth events constructed by the client.
+     */
+    AUTH(22242);
+
 }

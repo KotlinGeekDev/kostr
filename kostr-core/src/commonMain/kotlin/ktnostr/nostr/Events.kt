@@ -94,4 +94,15 @@ object Events {
         return generateEvent(kind, tags, content, privkey, pubkey, timeStamp)
     }
 
+    @JvmStatic
+    fun AuthEvent(privkey: String, pubkey: String,
+                  relayUrl: String, challengeString: String,
+                  timeStamp: Long = currentSystemTimestamp()
+    ): Event {
+        val authEventTags = mutableListOf<Tag>()
+        authEventTags.add(Tag("relay", relayUrl))
+        authEventTags.add(Tag("challenge", challengeString))
+        return generateEvent(EventKind.AUTH.kind, authEventTags, "", privkey, pubkey, timeStamp)
+    }
+
 }
