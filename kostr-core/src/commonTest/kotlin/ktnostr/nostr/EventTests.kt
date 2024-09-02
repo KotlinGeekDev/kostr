@@ -10,7 +10,7 @@ class EventTests {
     @Test
     fun `it generates the correct raw event json for obtaining the eventId`() {
         val someTags = listOf(
-            Tag("#p", "42365g3ghgf7gg15hj64jk")
+            Tag("p", "42365g3ghgf7gg15hj64jk")
             //Triple("#e", "546454ghgfnfg56456fgngg", "wss://relayer.fiatjaf.com")
         )
         println("Test 1:")
@@ -23,7 +23,7 @@ class EventTests {
             someTags, rawEventData[3]
         )
         val correctRawJson =
-            "[0,\"8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f\",1649108200,1,[[\"#p\",\"42365g3ghgf7gg15hj64jk\"]],\"Testing some event\"]"
+            "[0,\"8565b1a5a63ae21689b80eadd46f6493a3ed393494bb19d0854823a757d8f35f\",1649108200,1,[[\"p\",\"42365g3ghgf7gg15hj64jk\"]],\"Testing some event\"]"
         println(rawEventInJson)
         assertEquals(rawEventInJson, correctRawJson)
 
