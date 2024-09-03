@@ -148,6 +148,12 @@ data class RelayEventMessage(
     val eventJson: String
 ) : RelayMessage()
 
+/**
+ * Represents the relay response when it requires authentication,
+ * when the client sends an event, event filter request, or
+ * count request.
+ */
+@Serializable
 data class RelayAuthMessage(
     val messageType: String = "AUTH",
     val challenge: String
@@ -162,6 +168,7 @@ data class RelayAuthMessage(
  * response.
  * It is of the form [[OK, event-id, <true|false>, message]].
  */
+@Serializable
 data class EventStatus(
     val messageType: String = "OK",
     val eventId: String,
@@ -177,6 +184,7 @@ data class EventStatus(
  * filters in realtime as they are received.
  * The response is of the form [[EOSE, subscription]].
  */
+@Serializable
 data class RelayEose(
     val messageType: String = "EOSE",
     val subscriptionId: String
@@ -187,6 +195,7 @@ data class RelayEose(
  * close the connection, or disconnection from the relay.
  * The response is of the form [[CLOSED, subscription, error]].
  */
+@Serializable
 data class CloseMessage(
     val messageType: String = "CLOSED",
     val subscriptionId: String,
