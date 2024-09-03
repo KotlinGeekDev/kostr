@@ -93,12 +93,17 @@ data class ClientAuthMessage(
 open class ClientEventMessage(
     override val messageType: String = "EVENT",
     val event: Event
-) : ClientMessage(messageType)
+) : ClientMessage(messageType) {
+    override fun toString() = """
+        Message type -> $messageType
+        Event -> $event
+    """.trimIndent()
+}
 
 @Serializable(with = ClientMessage.MessageSerializer::class)
-data class RequestMessage(
+open class RequestMessage(
     override val messageType: String = "REQ",
-    val subscriptionId: String = uuid4().bytes.decodeToString().substring(0, 5),
+    open val subscriptionId: String = uuid4().bytes.decodeToString().substring(0, 5),
     val filters: List<NostrFilter>?
 ) : ClientMessage(messageType) {
     override fun toString() = """
@@ -107,6 +112,13 @@ data class RequestMessage(
         Filters -> $filters
     """.trimIndent()
 }
+
+@Serializable(with = ClientMessage.MessageSerializer::class)
+data class CountRequest(
+    override val messageType: String = "COUNT",
+    override val subscriptionId: String,
+    val countFilters: List<NostrFilter>?
+): RequestMessage(messageType, subscriptionId, filters = countFilters)
 
 @Serializable(with = ClientMessage.MessageSerializer::class)
 data class CloseRequest(
