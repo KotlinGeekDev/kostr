@@ -43,6 +43,30 @@ sealed class RelayMessage(){
                         val eventJson = if (eventJsonNode.jsonObject.isEmpty()) "" else eventJsonNode.jsonObject.toString()
                         RelayEventMessage(messageMarker, subscriptionId, eventJson)
                     }
+                    else if (messageMarker.contentEquals("COUNT")){
+                        val subscriptionId = messageJsonArray[1].jsonPrimitive.content
+                        val countInfo = messageJsonArray[2].jsonObject
+                        val actualCount = countInfo["count"]?.jsonPrimitive?.int
+                        val isApproximate = countInfo["approximate"]?.jsonPrimitive?.booleanOrNull
+                        if (actualCount != null) {
+                            if (isApproximate != null)
+                                CountResponse(
+                                    messageType = messageMarker,
+                                    subscriptionId = subscriptionId,
+                                    count = actualCount,
+                                    isApproximate = isApproximate
+                                )
+                            else
+                                CountResponse(
+                                    messageType = messageMarker,
+                                    subscriptionId = subscriptionId,
+                                    count = actualCount
+                                )
+                        }
+                        else {
+                            throw SerializationException("Could not parse count response: $messageJsonArray")
+                        }
+                    }
                     else {
                         val subscriptionId = messageJsonArray[1].jsonPrimitive.content
                         val errorMessage = messageJsonArray[2].jsonPrimitive.content
@@ -88,6 +112,21 @@ sealed class RelayMessage(){
                         add(messageTypeMarker)
                         add(subscriptionMarker)
                         add(eventJsonMarker)
+                    }
+                    is CountResponse -> {
+                        val messageTypeMarker = messageEncoder.encodeToJsonElement(value.messageType)
+                        val subscriptionMarker = messageEncoder.encodeToJsonElement(value.subscriptionId)
+                        val countInfo = buildJsonObject {
+                            put("count", value.count)
+                            //The assumption here is that the relay mentions a count is approximate if necessary.
+                            //If the count is not approximate, there's no need to mention it as false.
+                            with(value.isApproximate){
+                                if(this == true) put("approximate", this)
+                            }
+                        }
+                        add(messageTypeMarker)
+                        add(subscriptionMarker)
+                        add(countInfo)
                     }
                     is RelayAuthMessage -> {
                         val messageTag = messageEncoder.encodeToJsonElement(value.messageType)
@@ -157,6 +196,21 @@ data class RelayEventMessage(
 data class RelayAuthMessage(
     val messageType: String = "AUTH",
     val challenge: String
+): RelayMessage()
+
+/**
+ * Represents the response sent by the relay to a count request.
+ * If the count is approximate, it is indicated by the 'approximate'
+ * field in the response.
+ * It is of the form:
+ * [[COUNT,subscriptionId,{"count":count,"approximate":true|false}]]
+ */
+@Serializable
+data class CountResponse(
+    val messageType: String = "COUNT",
+    val subscriptionId: String,
+    val count: Int,
+    val isApproximate: Boolean = false
 ): RelayMessage()
 
 /**
