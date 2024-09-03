@@ -61,6 +61,7 @@ class NostrService(private val relayPool: RelayPool) {
         requestMessage: RequestMessage,
         onReceivedEvent: (Relay, Event) -> Unit,
         onAuthRequest: (Relay, RelayAuthMessage) -> Unit,
+        onCountResponse: (Relay, CountResponse) -> Unit,
         onEose: (Relay, RelayEose) -> Unit,
         onRelayNotice: (Relay, RelayNotice) -> Unit,
         onError: (Relay, Throwable) -> Unit
@@ -82,6 +83,10 @@ class NostrService(private val relayPool: RelayPool) {
                                     is RelayEventMessage -> {
                                         val event = deserializedEvent(receivedMessage.eventJson)
                                         onReceivedEvent(relay, event)
+                                    }
+
+                                    is CountResponse -> {
+                                        onCountResponse(relay, receivedMessage)
                                     }
 
                                     is RelayAuthMessage -> {
@@ -146,6 +151,10 @@ class NostrService(private val relayPool: RelayPool) {
                                     println("Event created on ${formattedDateTime(event.creationDate)}")
                                     println(event.content)
                                     eventResultList.add(event)
+                                }
+
+                                is CountResponse -> {
+                                    println("Received Count message: $receivedMessage")
                                 }
 
                                 is RelayAuthMessage -> {
