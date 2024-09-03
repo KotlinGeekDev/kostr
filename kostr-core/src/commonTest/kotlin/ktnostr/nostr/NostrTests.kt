@@ -55,7 +55,7 @@ class NostrTests {
         val testEvent = Event(
             "2be17aa3031bdcb006f0fce80c146dea9c1c0268b0af2398bb673365c6444d45",
             "f86c44a2de95d9149b51c6a29afeabba264c18e2fa7c49de93424a0c56947785",
-            1640839235, EventKind.ENCRYPTED_DM,
+            1640839235, EventKind.ENCRYPTED_DM.kind,
             listOf(
                 Tag("p", "13adc511de7e1cfcf1c6b7f6365fb5a03442d7bcacf565ea57fa7770912c023d")
             ),
@@ -81,7 +81,7 @@ class NostrTests {
         val correctlyParsedEvent = Event(
             "2be17aa3031bdcb006f0fce80c146dea9c1c0268b0af2398bb673365c6444d45",
             "f86c44a2de95d9149b51c6a29afeabba264c18e2fa7c49de93424a0c56947785",
-            1640839235, EventKind.ENCRYPTED_DM,
+            1640839235, EventKind.ENCRYPTED_DM.kind,
             listOf(
                 Tag("p", "13adc511de7e1cfcf1c6b7f6365fb5a03442d7bcacf565ea57fa7770912c023d")
             ),

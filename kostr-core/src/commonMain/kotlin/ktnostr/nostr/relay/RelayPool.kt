@@ -1,4 +1,4 @@
-package ktnostr.nostr.relays
+package ktnostr.nostr.relay
 
 import ktnostr.nostr.RelayError
 import kotlin.jvm.JvmStatic
@@ -22,11 +22,22 @@ class RelayPool {
         else throw RelayError("The relay ${relay.relayURI} could not be added.")
     }
 
+    fun addRelays(vararg relayUrls: String){
+        relayUrls.forEach { url ->
+            addRelay(Relay(url))
+        }
+    }
+
     fun removeRelay(relay: Relay) {
         relayList.remove(relay)
     }
 
     companion object {
+
+        fun fromUrls(vararg relayUris: String): RelayPool {
+            val relayList = relayUris.map { Relay(it) }
+            return RelayPool(relayList)
+        }
 
         @JvmStatic
         fun getDefaultRelays(): List<Relay> = listOf(

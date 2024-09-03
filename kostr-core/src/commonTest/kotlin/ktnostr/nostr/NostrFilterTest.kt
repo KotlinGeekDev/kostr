@@ -12,7 +12,7 @@ class NostrFilterTest {
     // For the first filter
     private val eventIdList = listOf("event_id_1", "event_id_2", "event_id_3")
     private val authorList = listOf("author_pubkey_1", "author_pubkey_2")
-    private val listOfKinds = listOf(EventKind.TEXT_NOTE)
+    private val listOfKinds = listOf(EventKind.TEXT_NOTE.kind)
     private val referencedEventIds = listOf("ref_event_id_1", "ref_event_id_2")
     private val referencedProfiles = listOf("ref_pubkey_1")
     private val upperTimeLimit = currentSystemTimestamp()
@@ -96,7 +96,7 @@ class NostrFilterTest {
         val textEventFilter = NostrFilter.newFilter()
             .idList(null)
             .authors(null)
-            .kinds(listOf(EventKind.TEXT_NOTE))
+            .kinds(listOf(EventKind.TEXT_NOTE.kind))
             .eventTagList(null)
             .pubkeyTagList(null)
             .since(previousTimestamp)

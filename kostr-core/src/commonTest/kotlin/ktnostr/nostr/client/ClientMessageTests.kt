@@ -24,7 +24,7 @@ class ClientMessageTests {
 
     @Test
     fun `single filter request message encodes properly`(){
-        val requestMessage = RequestMessage(subscriptionId = "mySub", filters = listOf(filterOne))
+        val requestMessage = RequestMessage(subscriptionId = "mySub", filters = testVectors().first().nostrFilters)
         val resultingJson = stringifyMessage(requestMessage)
         assertEquals(testVectors().first().nostrFilterJson, resultingJson)
     }
@@ -38,18 +38,32 @@ class ClientMessageTests {
     }
 
     @Test
-    fun `multiple filter request message encodes properly`() {
+    fun `multiple filter request message encodes properly`(){
         val requestMessage =
-            RequestMessage(subscriptionId = "mySub", filters = listOf(filterOne, filterTwo))
+            RequestMessage(subscriptionId = "mySub", filters = testVectors().last().nostrFilters)
         val requestJson = stringifyMessage(requestMessage)
         assertEquals(testVectors().last().nostrFilterJson, requestJson)
+    }
+
+    @Test
+    fun `single filter auth request encodes properly`(){
+        val countRequest = CountRequest(subscriptionId = "mySub", countFilters = countTestVectors().first().nostrFilters)
+        val correspondingJson = stringifyMessage(countRequest)
+        assertEquals(countTestVectors().first().nostrFilterJson, correspondingJson)
+    }
+
+    @Test
+    fun `multiple filter auth request encodes properly`(){
+        val countRequest = CountRequest(subscriptionId = "mySub", countFilters = countTestVectors().last().nostrFilters)
+        val correspondingJson = stringifyMessage(countRequest)
+        assertEquals(countTestVectors().last().nostrFilterJson, correspondingJson)
     }
 
     companion object {
         private val filterOne = NostrFilter.newFilter()
             .idList(listOf("event_id_1", "event_id_2", "event_id_3"))
             .authors(listOf("author_pubkey_1", "author_pubkey_2"))
-            .kinds(listOf(EventKind.TEXT_NOTE))
+            .kinds(listOf(EventKind.TEXT_NOTE.kind))
             .eventTagList(listOf("ref_event_id_1", "ref_event_id_2"))
             .pubkeyTagList(listOf("ref_pubkey_1"))
             .since(1653822739L - 24 * 60 * 60)
@@ -60,13 +74,19 @@ class ClientMessageTests {
         private val filterTwo = NostrFilter.newFilter()
             .idList(listOf("event_id_4", "event_id_5"))
             .authors(listOf("author_pubkey_3", "author_pubkey_4"))
-            .kinds(listOf(EventKind.METADATA, EventKind.RELAY_RECOMMENDATION))
+            .kinds(listOf(EventKind.METADATA.kind, EventKind.RELAY_RECOMMENDATION.kind))
             .eventTagList(listOf("ref_event_id_3", "ref_event_id_4"))
             .pubkeyTagList(listOf("ref_pubkey_2", "ref_pubkey_3", "ref_pubkey_4"))
             .since(1653822739L - 24 * 60 * 60)
             .until(1653822739L)
             .limit(10)
             .build()
+
+        @JvmStatic
+        fun countTestVectors() = listOf(
+            TV(listOf(filterOne), """["COUNT","mySub",{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25}]"""),
+            TV(listOf(filterOne, filterTwo), """["COUNT","mySub",{"ids":["event_id_1","event_id_2","event_id_3"],"authors":["author_pubkey_1","author_pubkey_2"],"kinds":[1],"#e":["ref_event_id_1","ref_event_id_2"],"#p":["ref_pubkey_1"],"since":1653736339,"until":1653822739,"limit":25},{"ids":["event_id_4","event_id_5"],"authors":["author_pubkey_3","author_pubkey_4"],"kinds":[0,2],"#e":["ref_event_id_3","ref_event_id_4"],"#p":["ref_pubkey_2","ref_pubkey_3","ref_pubkey_4"],"since":1653736339,"until":1653822739,"limit":10}]""")
+        )
 
         @JvmStatic
         fun testVectors() = listOf(

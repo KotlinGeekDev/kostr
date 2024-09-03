@@ -5,53 +5,66 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.utils.io.errors.*
 import io.ktor.websocket.*
 import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.update
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.consumeEach
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import ktnostr.formattedDateTime
 import ktnostr.nostr.Event
-import ktnostr.nostr.client.ClientEventMessage
 import ktnostr.nostr.client.ClientMessage
 import ktnostr.nostr.client.RequestMessage
 import ktnostr.nostr.deserializedEvent
 import ktnostr.nostr.eventMapper
-import ktnostr.nostr.relays.*
+import ktnostr.nostr.relay.*
 
 
 class NostrService(private val relayPool: RelayPool) {
-    private val relayNoticesCount = atomic(0)
+    private val relayEoseCount = atomic(0)
+    private val serviceMutex = Mutex()
 
-    val client = httpClient {
+    private val client = httpClient {
         install(WebSockets){
 
         }
+
         install(Logging){
 
         }
-
     }
 
-    suspend fun publishEvent(event: ClientMessage) {
-        when(event) {
-            is ClientEventMessage -> sendEvent(event)
-            is RequestMessage -> sendEvent(event)
-            else -> println("Sending these types is not yet implemented.")
-        }
-    }
+//    suspend fun publishEvent(event: ClientMessage) {
+//        when(event) {
+//            is ClientEventMessage -> sendEvent(event)
+//            is RequestMessage -> sendEvent(event)
+//            else -> println("Sending these types is not yet implemented.")
+//        }
+//    }
 
     suspend fun sendEvent(message: ClientMessage){
         val eventJson = eventMapper.encodeToString(message)
         relayPool.getRelays().forEach {
-            client.webSocketSession(it.relayURI).send(eventJson)
+            client.webSocket(it.relayURI){
+                send(eventJson)
+                for (frame in incoming){
+                    val messageJson = (frame as Frame.Text).readText()
+                    val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
+
+                }
+            }
         }
         client.close()
     }
 
-    suspend fun request(requestMessage: RequestMessage,
-                        onReceivedEvent: (Relay, Event) -> Unit,
-                        onRelayNotice: (Relay, RelayNotice) -> Unit,
-                        onError: (Throwable) -> Unit
+    suspend fun request(
+        requestMessage: RequestMessage,
+        onReceivedEvent: (Relay, Event) -> Unit,
+        onAuthRequest: (Relay, RelayAuthMessage) -> Unit,
+        onCountResponse: (Relay, CountResponse) -> Unit,
+        onEose: (Relay, RelayEose) -> Unit,
+        onRelayNotice: (Relay, RelayNotice) -> Unit,
+        onError: (Relay, Throwable) -> Unit
     ) {
         val requestJson = eventMapper.encodeToString(requestMessage)
         coroutineScope {
@@ -72,153 +85,146 @@ class NostrService(private val relayPool: RelayPool) {
                                         onReceivedEvent(relay, event)
                                     }
 
+                                    is CountResponse -> {
+                                        onCountResponse(relay, receivedMessage)
+                                    }
+
+                                    is RelayAuthMessage -> {
+                                        println("Received Auth message: $receivedMessage")
+                                        onAuthRequest(relay, receivedMessage)
+                                    }
+
+                                    is EventStatus -> {
+                                        println("Received a status for the sent event: \n $receivedMessage")
+                                    }
+
+                                    is RelayEose -> {
+                                        onEose(relay, receivedMessage)
+                                    }
+
+                                    is CloseMessage -> {
+                                        onError(relay, Exception(receivedMessage.errorMessage))
+                                    }
+
                                     is RelayNotice -> {
                                         onRelayNotice(relay, receivedMessage)
-
                                     }
                                 }
                             }
                         }
                     } catch (e: IOException) {
-                        onError(e)
+                        onError(relay, e)
                         println("Terminating connection to ${relay.relayURI}...")
                         if (isActive) this@relayScope.cancel()
                     } catch (err: Exception) {
-                        onError(err)
+                        onError(relay, err)
                     } catch (t: Throwable) {
-                        onError(t)
+                        onError(relay, t)
                     }
                 }
             }
         }
     }
 
-    suspend fun requestWithResult(requestMessage: RequestMessage): Result<List<Event>>? {
+
+    suspend fun requestWithResult(
+        requestMessage: RequestMessage,
+        relayList: List<Relay> = relayPool.getRelays()
+    ): Result<List<Event>> {
         val requestJson = eventMapper.encodeToString(requestMessage)
-        val eventList = mutableListOf<Event>()
-        var returnedResult : Result<List<Event>>? = null
-
-        for ((relayIndex, relay) in relayPool.getRelays().withIndex()) {
+        val relayAuthCache: MutableMap<Relay, RelayAuthMessage> = mutableMapOf()
+        val eventResultList = emptyList<Event>().toMutableList()
+        var returnedResult: Result<List<Event>> = Result.failure(Exception("Empty list"))
+        val connections = relayList.mapIndexed { index: Int, relay: Relay ->
             client.launch {
-                client.webSocket(urlString = relay.relayURI) {
-                    send(requestJson)
+                try {
+                    client.webSocket(urlString = relay.relayURI){
+                        send(Frame.Text(requestJson))
+                        incoming.consumeAsFlow().collect { frame ->
+                            val received = (frame as Frame.Text).readText()
+                            val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
 
-//                incoming.receive().let{ frame ->
-//                    val received = (frame as Frame.Text).readText()
-//                    println(received)
-//
-//
-//                    val receivedMessage = eventMapper.readValue<RelayMessage>(received)
-//
-//                    when (receivedMessage) {
-//                        is RelayEventMessage -> {
-//                            println("Received from ${relay.relayURI}")
-//                            val event = deserializedEvent(receivedMessage.eventJson)
-//                            println("Event created on ${formattedDateTime(event.creationDate)}")
-//                            println(event.content)
-//                            returnedResult = Result.success(event)
-//
-//
-//                        }
-//
-//                        is RelayNotice -> {
-//                            println(receivedMessage)
-//                        }
-//
-//                    }
-//                }
+                            when (receivedMessage) {
+                                is RelayEventMessage -> {
+                                    println("Event message received from ${relay.relayURI} with index $index")
+                                    val event = deserializedEvent(receivedMessage.eventJson)
+                                    println("Event created on ${formattedDateTime(event.creationDate)}")
+                                    println(event.content)
+                                    eventResultList.add(event)
+                                }
 
+                                is CountResponse -> {
+                                    println("Received Count message: $receivedMessage")
+                                }
 
-                    incoming.consumeEach {
-                        val json = (it as Frame.Text).readText()
-                        println(json)
+                                is RelayAuthMessage -> {
+                                    println("Received Auth message: $receivedMessage")
+                                    serviceMutex.withLock {
+                                        if (relayAuthCache.put(relay, receivedMessage) != null){
+                                            println("Added auth message <-$receivedMessage-> to cache.")
+                                        }
+                                    }
+                                }
 
-                        val receivedMessage = eventMapper.decodeFromString<RelayMessage>(json)
+                                is EventStatus -> {
+                                    println("Received a status for the sent event:")
+                                    println(receivedMessage)
+                                }
 
-                        when (receivedMessage) {
-                            is RelayEventMessage -> {
-                                println("Received from ${relay.relayURI} with index $relayIndex")
-                                val event = deserializedEvent(receivedMessage.eventJson)
-                                println("Event created on ${formattedDateTime(event.creationDate)}")
-                                println(event.content)
-                                eventList.add(event)
+                                is RelayEose -> {
+                                    if (relayEoseCount.value == relayPool.getRelays().size){
+                                        close()
+                                        if (eventResultList.isNotEmpty())
+                                            returnedResult = Result.success(eventResultList.toList())
 
+                                    } else {
+                                        relayEoseCount.update { it + 1 }
+                                        println("Relay EOSE received from ${relay.relayURI} with index $index")
+                                        println(receivedMessage)
+                                    }
+                                    println("***********--")
+                                    println("**List count: ${relayPool.getRelays().size}")
+                                    println("**EOSE count: ${relayEoseCount.value}")
+                                    println("************--")
+                                }
 
-                            }
+                                is CloseMessage -> {
+                                    relayEoseCount.update { it + 1 }
+                                    println("Closed by Relay ${relay.relayURI} with reason: ${receivedMessage.errorMessage}")
+                                }
 
-                            is RelayNotice -> {
-                                println("Received notice from ${relay.relayURI}. Index $relayIndex")
-                                println(receivedMessage)
-                                if (relayIndex == relayPool.getRelays().size - 1){
-                                    client.cancel()
-                                    if (eventList.isNotEmpty()) returnedResult = Result.success(eventList)
+                                is RelayNotice -> {
+                                    println("Received a relay notice: $receivedMessage")
                                 }
                             }
-
                         }
-
                     }
-                    //close()
+                } catch (e: IOException) {
+                    println("Network error for Relay:${relay.relayURI}-> ${e.message}")
+                    if (e.message?.contains("Failed to connect") == true) {
+                        relayPool.removeRelay(relay)
+                    }
+                    relayEoseCount.update { it + 1 }
+                    println("***********--")
+                    println("**List count: ${relayPool.getRelays().size}")
+                    println("**EOSE count: ${relayEoseCount.value}")
+                    println("************--")
+                    if (relayEoseCount.value == relayPool.getRelays().size){
+                        println("Terminating...")
+                        client.cancel()
+                        if (eventResultList.isNotEmpty())
+                            returnedResult = Result.success(eventResultList.toList())
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
-
         }
+
+        connections.joinAll()
+
         return returnedResult
     }
 
-    suspend fun manualRequestWithResult(
-        requestMessage: RequestMessage,
-        relayList: List<Relay> = relayPool.getRelays()
-    ): Result<Event> {
-        val requestJson = eventMapper.encodeToString(requestMessage)
-        var returnedResult: Result<Event>? = null
-        val connections = relayList.mapIndexed { index: Int, relay: Relay ->
-
-            client.launch {
-                client.webSocket(urlString = relay.relayURI){
-                    send(Frame.Text(requestJson))
-                    incoming.consumeAsFlow().collect { frame ->
-                        val received = (frame as Frame.Text).readText()
-                        //println(received)
-
-
-                        val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
-                        //println(receivedMessage.toString())
-
-                        when (receivedMessage) {
-                            is RelayEventMessage -> {
-                                println("Event message received from ${relay.relayURI} with index $index")
-                                val event = deserializedEvent(receivedMessage.eventJson)
-                                println("Event created on ${formattedDateTime(event.creationDate)}")
-                                println(event.content)
-                                returnedResult = Result.success(event)
-
-                            }
-
-                            is RelayNotice -> {
-                                relayNoticesCount.getAndIncrement()
-                                println("Relay notice received from ${relay.relayURI} with index $index")
-                                println(receivedMessage)
-                                if (relayNoticesCount.value == relayList.size){
-                                    client.cancel()
-                                }
-
-                            }
-
-                        }
-                    }
-                }
-
-            }
-
-        }
-
-        //connections.joinAll()
-        //delay(1500L)
-        connections.joinAll()
-
-
-        return returnedResult!!
-    }
 }
 

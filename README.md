@@ -1,14 +1,15 @@
 # Kostr
 
-The Kotlin Multiplatform library for working with Nostr.
+A Kotlin Multiplatform library for working with Nostr, with support for JVM, Android, Linux, MacOS/iOS.
 
 Note: This is still in development and very incomplete.
 
 
 ## What is Nostr?
-* The Nostr protocol specs can be found [here](https://github.com/nostr-protocol/nostr)
+* An introduction or description of Nostr can be found [here](https://github.com/nostr-protocol/nostr).
+* The Nostr protocol specs can be found [here](https://github.com/nostr-protocol/nips).
 
-## How to include it
+## How to include the libary
   Inside your root-level `build.gradle(.kts)` file, you should add `jitpack`:
   ``` kotlin
 // build.gradle.kts
@@ -52,7 +53,7 @@ then, in your module's `build.gradle(.kts)`, you need to add:
 // build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.AnonymousGeekDev.kostr:kostr-core:v1.0-beta")
+    implementation("com.github.AnonymousGeekDev.kostr:kostr-core:v1.0-beta-02")
 }
 
 ```
