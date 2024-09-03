@@ -28,7 +28,7 @@ object Events {
         val signature = CryptoUtils.signContent(privateKeyHex.toBytes(), eventIDRaw)
         val signatureString = signature.toHexString()
         val normalizedTags = tags.map {
-            Tag(it.identifier.drop(1),
+            Tag(it.identifier,
                 it.description,
                 it.recommendedRelayUrl,
                 it.petname)
