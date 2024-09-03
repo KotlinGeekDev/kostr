@@ -149,15 +149,15 @@ publishing {
     publications.withType<MavenPublication>(){
         artifact(javadocJar)
     }
-//    publications {
-//        project.sourceSets.forEach { sourceSet ->
-//            withType<MavenPublication> {
-//                groupId = project.parent?.group.toString()
-//                artifactId = sourceSet.name
-//                version = project.parent?.version.toString()
-//                artifact(tasks.jar)
-//                //from(components["kotlin"])
-//            }
-//        }
-//    }
+    publications {
+        project.sourceSets.forEach { sourceSet ->
+            withType<MavenPublication> {
+                groupId = project.parent?.group.toString()
+                artifactId = sourceSet.name
+                version = project.parent?.version.toString()
+                artifact(tasks.jar)
+                //from(components["kotlin"])
+            }
+        }
+    }
 }

@@ -31,7 +31,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
     group = "com.github.KotlinGeekDev"
-    version = "1.0-beta-02"
+    version = "1.0-beta-02-pre"
 
 }
 
