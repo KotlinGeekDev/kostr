@@ -42,7 +42,7 @@ class NostrService(private val relayPool: RelayPool) {
 //        }
 //    }
 
-    suspend fun sendEvent(message: ClientMessage){
+    suspend fun sendEvent(message: ClientMessage, onRelayMessage: (Relay, RelayMessage) -> Unit){
         val eventJson = eventMapper.encodeToString(message)
         relayPool.getRelays().forEach {
             client.webSocket(it.relayURI){
@@ -50,7 +50,7 @@ class NostrService(private val relayPool: RelayPool) {
                 for (frame in incoming){
                     val messageJson = (frame as Frame.Text).readText()
                     val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
-
+                    onRelayMessage(it, decodedMessage)
                 }
             }
         }
@@ -59,12 +59,8 @@ class NostrService(private val relayPool: RelayPool) {
 
     suspend fun request(
         requestMessage: RequestMessage,
-        onReceivedEvent: (Relay, Event) -> Unit,
-        onAuthRequest: (Relay, RelayAuthMessage) -> Unit,
-        onCountResponse: (Relay, CountResponse) -> Unit,
-        onEose: (Relay, RelayEose) -> Unit,
-        onRelayNotice: (Relay, RelayNotice) -> Unit,
-        onError: (Relay, Throwable) -> Unit
+        onError: (Relay, Throwable) -> Unit,
+        onRelayMessage: (Relay, RelayMessage) -> Unit,
     ) {
         val requestJson = eventMapper.encodeToString(requestMessage)
         coroutineScope {
@@ -78,38 +74,7 @@ class NostrService(private val relayPool: RelayPool) {
                             for (frame in incoming) {
                                 val received = (frame as Frame.Text).readText()
                                 val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
-
-                                when(receivedMessage){
-                                    is RelayEventMessage -> {
-                                        val event = deserializedEvent(receivedMessage.eventJson)
-                                        onReceivedEvent(relay, event)
-                                    }
-
-                                    is CountResponse -> {
-                                        onCountResponse(relay, receivedMessage)
-                                    }
-
-                                    is RelayAuthMessage -> {
-                                        println("Received Auth message: $receivedMessage")
-                                        onAuthRequest(relay, receivedMessage)
-                                    }
-
-                                    is EventStatus -> {
-                                        println("Received a status for the sent event: \n $receivedMessage")
-                                    }
-
-                                    is RelayEose -> {
-                                        onEose(relay, receivedMessage)
-                                    }
-
-                                    is CloseMessage -> {
-                                        onError(relay, Exception(receivedMessage.errorMessage))
-                                    }
-
-                                    is RelayNotice -> {
-                                        onRelayNotice(relay, receivedMessage)
-                                    }
-                                }
+                                onRelayMessage(relay, receivedMessage)
                             }
                         }
                     } catch (e: IOException) {
