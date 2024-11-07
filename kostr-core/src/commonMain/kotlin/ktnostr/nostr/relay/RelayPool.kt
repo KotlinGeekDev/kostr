@@ -45,7 +45,6 @@ class RelayPool {
             Relay("wss://relay.damus.io"),
             Relay("wss://relay.nostr.wirednet.jp"),
             Relay("wss://relay.nostr.band"),
-            Relay("wss://nostr.inosta.cc")
         )
     }
 
