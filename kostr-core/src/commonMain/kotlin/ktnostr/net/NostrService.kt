@@ -59,8 +59,8 @@ class NostrService(private val relayPool: RelayPool) {
 
     suspend fun request(
         requestMessage: RequestMessage,
-        onError: (Relay, Throwable) -> Unit,
-        onRelayMessage: (Relay, RelayMessage) -> Unit,
+        onRequestError: (Relay, Throwable) -> Unit,
+        onRelayMessage: (relay: Relay, received: RelayMessage) -> Unit,
     ) {
         val requestJson = eventMapper.encodeToString(requestMessage)
         coroutineScope {
@@ -78,13 +78,12 @@ class NostrService(private val relayPool: RelayPool) {
                             }
                         }
                     } catch (e: IOException) {
-                        onError(relay, e)
-                        println("Terminating connection to ${relay.relayURI}...")
+                        onRequestError(relay, e)
                         if (isActive) this@relayScope.cancel()
                     } catch (err: Exception) {
-                        onError(relay, err)
+                        onRequestError(relay, err)
                     } catch (t: Throwable) {
-                        onError(relay, t)
+                        onRequestError(relay, t)
                     }
                 }
             }
@@ -100,12 +99,13 @@ class NostrService(private val relayPool: RelayPool) {
         val relayAuthCache: MutableMap<Relay, RelayAuthMessage> = mutableMapOf()
         val eventResultList = emptyList<Event>().toMutableList()
         var returnedResult: Result<List<Event>> = Result.failure(Exception("Empty list"))
-        val connections = relayList.mapIndexed { index: Int, relay: Relay ->
+        val connectionJobs = relayList.mapIndexed { index: Int, relay: Relay ->
             client.launch {
                 try {
                     client.webSocket(urlString = relay.relayURI){
                         send(Frame.Text(requestJson))
                         incoming.consumeAsFlow().collect { frame ->
+                            ensureActive()
                             val received = (frame as Frame.Text).readText()
                             val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
 
@@ -137,7 +137,7 @@ class NostrService(private val relayPool: RelayPool) {
                                 }
 
                                 is RelayEose -> {
-                                    if (relayEoseCount.value == relayPool.getRelays().size){
+                                    if (relayEoseCount.value == relayList.size){
                                         close()
                                         if (eventResultList.isNotEmpty())
                                             returnedResult = Result.success(eventResultList.toList())
@@ -148,7 +148,7 @@ class NostrService(private val relayPool: RelayPool) {
                                         println(receivedMessage)
                                     }
                                     println("***********--")
-                                    println("**List count: ${relayPool.getRelays().size}")
+                                    println("**List count: ${relayList.size}")
                                     println("**EOSE count: ${relayEoseCount.value}")
                                     println("************--")
                                 }
@@ -165,20 +165,19 @@ class NostrService(private val relayPool: RelayPool) {
                         }
                     }
                 } catch (e: IOException) {
-                    println("Network error for Relay:${relay.relayURI}-> ${e.message}")
-                    if (e.message?.contains("Failed to connect") == true) {
-                        relayPool.removeRelay(relay)
-                    }
-                    relayEoseCount.update { it + 1 }
-                    println("***********--")
-                    println("**List count: ${relayPool.getRelays().size}")
-                    println("**EOSE count: ${relayEoseCount.value}")
-                    println("************--")
-                    if (relayEoseCount.value == relayPool.getRelays().size){
+                    if (relayEoseCount.value == relayList.size){
                         println("Terminating...")
-                        client.cancel()
                         if (eventResultList.isNotEmpty())
                             returnedResult = Result.success(eventResultList.toList())
+
+                        client.cancel()
+                    } else {
+                        relayPool.removeRelay(relay)
+                        relayEoseCount.update { it + 1 }
+                        println("***********--")
+                        println("**List count: ${relayList.size}")
+                        println("**EOSE count: ${relayEoseCount.value}")
+                        println("************--")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -186,7 +185,7 @@ class NostrService(private val relayPool: RelayPool) {
             }
         }
 
-        connections.joinAll()
+        connectionJobs.joinAll()
 
         return returnedResult
     }
