@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 val kotlinVersion = "2.0.0"
-val ktorVersion = "2.3.10"
+val ktorVersion = "3.0.1"
 val kotlinCryptoVersion = "0.3.1"
 val junitJupiterVersion = "5.10.1"
 
@@ -64,7 +64,6 @@ kotlin {
 
             //Kotlin base
             implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
             implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
             //Crypto(Secp256k1-utils, SecureRandom, Hashing, etc.)
@@ -73,7 +72,7 @@ kotlin {
             implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
 
             //Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
             //Coroutines
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
             //Atomics
@@ -91,6 +90,7 @@ kotlin {
 
         jvmMain.dependencies {
             //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
+            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
             implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 
