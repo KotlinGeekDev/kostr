@@ -1,6 +1,6 @@
 buildscript {
 
-    val kotlinVersion = "2.0.0"
+    val kotlinVersion = "2.0.20"
     repositories {
         google()
         mavenCentral()
@@ -31,7 +31,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
     group = "com.github.KotlinGeekDev"
-    version = "1.0-beta-04"
+    version = "1.0-beta-05"
 
 }
 

@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
-val kotlinVersion = "2.0.0"
+val kotlinVersion = "2.0.20"
 val ktorVersion = "3.0.1"
 val kotlinCryptoVersion = "0.4.0"
 
@@ -17,6 +17,7 @@ plugins {
 
 kotlin {
     //explicitApi()
+    jvmToolchain(17)
 
     jvm {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
@@ -91,7 +92,6 @@ kotlin {
 
         jvmMain.dependencies {
             //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
-            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
             implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 

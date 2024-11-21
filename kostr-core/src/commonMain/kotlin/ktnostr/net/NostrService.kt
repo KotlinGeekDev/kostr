@@ -2,12 +2,10 @@ package ktnostr.net
 
 import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.websocket.*
-import io.ktor.utils.io.errors.*
 import io.ktor.websocket.*
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
@@ -18,9 +16,10 @@ import ktnostr.nostr.client.RequestMessage
 import ktnostr.nostr.deserializedEvent
 import ktnostr.nostr.eventMapper
 import ktnostr.nostr.relay.*
+import kotlin.coroutines.CoroutineContext
 
 
-class NostrService(private val relayPool: RelayPool) {
+class NostrService(private val relayPool: RelayPool, override val coroutineContext: CoroutineContext): CoroutineScope {
     private val relayEoseCount = atomic(0)
     private val serviceMutex = Mutex()
 
@@ -61,134 +60,161 @@ class NostrService(private val relayPool: RelayPool) {
     suspend fun request(
         requestMessage: RequestMessage,
         onRequestError: (Relay, Throwable) -> Unit,
-        onRelayMessage: (relay: Relay, received: RelayMessage) -> Unit,
+        onRelayMessage: suspend (relay: Relay, received: RelayMessage) -> Unit,
+    ) {
+
+
+        for (relay in relayPool.getRelays()) {
+            requestFromRelay(
+                requestMessage,
+                relay,
+                onRelayMessage = onRelayMessage,
+                onRequestError = onRequestError
+            )
+        }
+//        val requestJson = eventMapper.encodeToString(requestMessage)
+//
+//        for (relay in relayPool.getRelays()) {
+//            println("Coroutine Scope @ ${relay.relayURI}")
+//            try {
+//                client.webSocket(urlString = relay.relayURI) {
+//                    send(requestJson)
+//
+//                    for (frame in incoming) {
+//                        val received = (frame as Frame.Text).readText()
+//                        val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
+//                        onRelayMessage(relay, receivedMessage)
+//                    }
+//                }
+//            } catch (e: kotlinx.io.IOException) {
+//                onRequestError(relay, e)
+//                if (client.isActive) this.client.cancel()
+//            } catch (err: Exception) {
+//                onRequestError(relay, err)
+//            } catch (t: Throwable) {
+//                onRequestError(relay, t)
+//            }
+//        }
+    }
+
+    private suspend fun requestFromRelay(
+        requestMessage: RequestMessage,
+        relay: Relay,
+        onRelayMessage: suspend (Relay, RelayMessage) -> Unit,
+        onRequestError: (Relay, Throwable) -> Unit
     ) {
         val requestJson = eventMapper.encodeToString(requestMessage)
-        coroutineScope {
-            for (relay in relayPool.getRelays()) {
-                launch relayScope@{
-                    println("Coroutine Scope @ ${relay.relayURI}")
-                    try {
-                        client.webSocket(urlString = relay.relayURI) {
-                            send(requestJson)
 
-                            for (frame in incoming) {
-                                val received = (frame as Frame.Text).readText()
-                                val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
-                                onRelayMessage(relay, receivedMessage)
-                            }
-                        }
-                    } catch (e: IOException) {
-                        onRequestError(relay, e)
-                        if (isActive) this@relayScope.cancel()
-                    } catch (err: Exception) {
-                        onRequestError(relay, err)
-                    } catch (t: Throwable) {
-                        onRequestError(relay, t)
-                    }
+        println("Coroutine Scope @ ${relay.relayURI}")
+        try {
+            client.webSocket(urlString = relay.relayURI) {
+                send(requestJson)
+
+                for (frame in incoming) {
+                    val received = (frame as Frame.Text).readText()
+                    val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
+                    onRelayMessage(relay, receivedMessage)
                 }
             }
+        } catch (e: kotlinx.io.IOException) {
+            onRequestError(relay, e)
+            if (client.isActive) this.client.cancel()
+        } catch (err: Exception) {
+            onRequestError(relay, err)
+        } catch (t: Throwable) {
+            onRequestError(relay, t)
         }
     }
 
-
     suspend fun requestWithResult(
         requestMessage: RequestMessage,
-        relayList: List<Relay> = relayPool.getRelays()
-    ): Result<List<Event>> {
-        val requestJson = eventMapper.encodeToString(requestMessage)
+        endpoints: List<Relay> = relayPool.getRelays()
+    ): List<Event> {
+
+        val results = mutableListOf<Event>()
         val relayAuthCache: MutableMap<Relay, RelayAuthMessage> = mutableMapOf()
-        val eventResultList = emptyList<Event>().toMutableList()
-        var returnedResult: Result<List<Event>> = Result.failure(Exception("Empty list"))
-        val connectionJobs = relayList.mapIndexed { index: Int, relay: Relay ->
-            client.launch {
+        val jobs = mutableListOf<Job>()
+        val requestJson = eventMapper.encodeToString(requestMessage)
+
+        for (endpoint in endpoints) ret@{
+            println("Coroutine Scope @ ${endpoint.relayURI}")
+            val job = launch {
                 try {
-                    client.webSocket(urlString = relay.relayURI){
-                        send(Frame.Text(requestJson))
-                        incoming.consumeAsFlow().collect { frame ->
-                            ensureActive()
-                            val received = (frame as Frame.Text).readText()
-                            val receivedMessage = eventMapper.decodeFromString<RelayMessage>(received)
+                    client.webSocket(endpoint.relayURI) {
+                        send(requestJson)
 
-                            when (receivedMessage) {
-                                is RelayEventMessage -> {
-                                    println("Event message received from ${relay.relayURI} with index $index")
-                                    val event = deserializedEvent(receivedMessage.eventJson)
-                                    println("Event created on ${formattedDateTime(event.creationDate)}")
-                                    println(event.content)
-                                    eventResultList.add(event)
-                                }
+                        for (frame in incoming) {
+                            if (frame is Frame.Text) {
+                                val message = eventMapper.decodeFromString<RelayMessage>(frame.readText())
+                                when (message) {
+                                    is RelayEventMessage -> {
+                                        println("Event message received from ${endpoint.relayURI}")
+                                        val event = deserializedEvent(message.eventJson)
+                                        println("Event created on ${formattedDateTime(event.creationDate)}")
+                                        println(event.content)
+                                        results.add(event)
 
-                                is CountResponse -> {
-                                    println("Received Count message: $receivedMessage")
-                                }
+                                    }
 
-                                is RelayAuthMessage -> {
-                                    println("Received Auth message: $receivedMessage")
-                                    serviceMutex.withLock {
-                                        if (relayAuthCache.put(relay, receivedMessage) != null){
-                                            println("Added auth message <-$receivedMessage-> to cache.")
+                                    is CountResponse -> {
+                                        println("Received Count message: $message")
+                                    }
+
+                                    is RelayAuthMessage -> {
+                                        println("Received Auth message: $message")
+                                        serviceMutex.withLock {
+                                            if (relayAuthCache.put(endpoint, message) != null){
+                                                println("Added auth message <-$message-> to cache.")
+                                            }
                                         }
                                     }
-                                }
 
-                                is EventStatus -> {
-                                    println("Received a status for the sent event:")
-                                    println(receivedMessage)
-                                }
-
-                                is RelayEose -> {
-                                    if (relayEoseCount.value == relayList.size){
-                                        close()
-                                        if (eventResultList.isNotEmpty())
-                                            returnedResult = Result.success(eventResultList.toList())
-
-                                    } else {
-                                        relayEoseCount.update { it + 1 }
-                                        println("Relay EOSE received from ${relay.relayURI} with index $index")
-                                        println(receivedMessage)
+                                    is EventStatus -> {
+                                        println("Received a status for the sent event:")
+                                        println(message)
                                     }
-                                    println("***********--")
-                                    println("**List count: ${relayList.size}")
-                                    println("**EOSE count: ${relayEoseCount.value}")
-                                    println("************--")
-                                }
 
-                                is CloseMessage -> {
-                                    relayEoseCount.update { it + 1 }
-                                    println("Closed by Relay ${relay.relayURI} with reason: ${receivedMessage.errorMessage}")
-                                }
+                                    is RelayEose -> {
+                                        if (relayEoseCount.value == endpoints.size){
+                                            client.close()
+//                                            if (isActive) break
+//                                            break
 
-                                is RelayNotice -> {
-                                    println("Received a relay notice: $receivedMessage")
+                                        } else {
+                                            relayEoseCount.update { it + 1 }
+                                            println("Relay EOSE received from ${endpoint.relayURI}")
+                                            println(message)
+                                        }
+                                        println("***********--")
+                                        println("**List count: ${endpoints.size}")
+                                        println("**EOSE count: ${relayEoseCount.value}")
+                                        println("************--")
+                                    }
+
+                                    is CloseMessage -> {
+                                        relayEoseCount.update { it + 1 }
+                                        println("Closed by Relay ${endpoint.relayURI} with reason: ${message.errorMessage}")
+                                    }
+
+                                    is RelayNotice -> {
+                                        println("Received a relay notice: $message")
+                                    }
                                 }
+                                break
                             }
                         }
                     }
-                } catch (e: IOException) {
-                    if (relayEoseCount.value == relayList.size){
-                        println("Terminating...")
-                        if (eventResultList.isNotEmpty())
-                            returnedResult = Result.success(eventResultList.toList())
-
-                        client.cancel()
-                    } else {
-                        relayPool.removeRelay(relay)
-                        relayEoseCount.update { it + 1 }
-                        println("***********--")
-                        println("**List count: ${relayList.size}")
-                        println("**EOSE count: ${relayEoseCount.value}")
-                        println("************--")
-                    }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    println("Failed to connect to $endpoint: ${e.message}")
                 }
             }
+            jobs.add(job)
         }
 
-        connectionJobs.joinAll()
+        jobs.forEach { it.join() }
+        client.close()
 
-        return returnedResult
+        return results
     }
 
 }
