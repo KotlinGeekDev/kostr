@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 val kotlinVersion = "2.0.0"
 val ktorVersion = "3.0.1"
-val kotlinCryptoVersion = "0.3.1"
+val kotlinCryptoVersion = "0.4.0"
 val junitJupiterVersion = "5.10.1"
 
 plugins {
@@ -74,11 +74,11 @@ kotlin {
             //Serialization
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
             //Coroutines
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             //Atomics
             implementation("org.jetbrains.kotlinx:atomicfu:0.25.0")
             //Date-time
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
             //UUID
             implementation("com.benasher44:uuid:0.8.4")
         }
