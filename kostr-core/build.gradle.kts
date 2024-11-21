@@ -91,7 +91,6 @@ kotlin {
 
         jvmMain.dependencies {
             //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
-            implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
             implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 
