@@ -53,7 +53,8 @@ then, in your module's `build.gradle(.kts)`, you need to add:
 // build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.AnonymousGeekDev.kostr:kostr-core:v1.0-beta-02")
+    implementation("com.github.KotlinGeekDev.kostr:kostr-core:v1.0-beta-02")
+
 }
 
 ```
@@ -62,7 +63,7 @@ dependencies {
 
     MIT License
     
-    Copyright (c) 2022 NullKtDev
+    Copyright (c) 2022 KotlinGeekDev
     
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
