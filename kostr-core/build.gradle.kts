@@ -17,6 +17,7 @@ plugins {
 
 kotlin {
     //explicitApi()
+    jvmToolchain(17)
 
     jvm {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
