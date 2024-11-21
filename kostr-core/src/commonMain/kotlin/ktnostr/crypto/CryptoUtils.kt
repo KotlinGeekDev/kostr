@@ -2,7 +2,7 @@
 
 package ktnostr.crypto
 
-import dev.whyoleg.cryptography.algorithms.digest.SHA256
+import dev.whyoleg.cryptography.algorithms.SHA256
 import fr.acinq.secp256k1.Hex
 import fr.acinq.secp256k1.Secp256k1
 import fr.acinq.secp256k1.Secp256k1Exception
