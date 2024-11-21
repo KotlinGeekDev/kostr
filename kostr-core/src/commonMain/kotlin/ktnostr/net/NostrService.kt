@@ -51,6 +51,7 @@ class NostrService(private val relayPool: RelayPool) {
                     val messageJson = (frame as Frame.Text).readText()
                     val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
                     onRelayMessage(it, decodedMessage)
+
                 }
             }
         }
