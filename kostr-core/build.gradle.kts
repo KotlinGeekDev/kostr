@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
-val kotlinVersion = "2.0.20"
+val kotlinVersion = "2.0.0"
 val ktorVersion = "3.0.1"
 val kotlinCryptoVersion = "0.4.0"
 
@@ -18,6 +19,10 @@ plugins {
 kotlin {
     //explicitApi()
     jvmToolchain(17)
+    compilerOptions {
+        apiVersion.set(KotlinVersion.KOTLIN_1_8)
+        languageVersion.set(KotlinVersion.KOTLIN_1_8)
+    }
 
     jvm {
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
