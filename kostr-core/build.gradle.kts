@@ -28,7 +28,7 @@ kotlin {
         languageVersion.set(KotlinVersion.KOTLIN_1_8)
     }
 
-    jvm {
+    jvm("baseJvm") {
 
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
@@ -42,8 +42,8 @@ kotlin {
         }
     }
 
-    androidTarget {
-        publishLibraryVariants("release")
+    androidTarget() {
+        publishLibraryVariants()
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
@@ -113,14 +113,7 @@ kotlin {
         val commonJvmMain = create("commonJvmMain") {
             dependsOn(commonMain.get())
         }
-
-        val commonJvmTest = create("commonJvmTest") {
-            dependsOn(commonTest.get())
-        }
-
-        jvmMain.dependencies {
-            //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
-            implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
+        commonJvmMain.dependencies {
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 
             implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -128,16 +121,10 @@ kotlin {
             implementation("ch.qos.logback:logback-classic:1.4.14")
         }
 
-        androidMain.get().dependsOn(jvmMain.get())
-        androidMain.dependencies {
-            implementation("androidx.appcompat:appcompat:1.7.0")
-//            testImplementation 'junit:junit:4.13.2'
-//            androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-//            androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+        val commonJvmTest = create("commonJvmTest") {
+            dependsOn(commonTest.get())
         }
-
-
-        jvmTest.dependencies {
+        commonJvmTest.dependencies {
             implementation(kotlin("test-junit5"))
 
             implementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
@@ -146,6 +133,39 @@ kotlin {
             runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:0.15.0")
             runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
             runtimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion")
+        }
+
+        val baseJvmMain by getting {
+            dependsOn(commonJvmMain)
+
+            dependencies {
+                //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
+                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
+            }
+        }
+
+
+
+        androidMain.configure {
+            dependsOn(commonJvmMain)
+
+            dependencies {
+                implementation("androidx.appcompat:appcompat:1.7.0")
+                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.15.0")
+//            testImplementation 'junit:junit:4.13.2'
+//            androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+//            androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+            }
+        }
+
+
+        val androidUnitTest by getting {
+            dependsOn(commonJvmTest)
+        }
+
+
+        val baseJvmTest by getting {
+            dependsOn(commonJvmTest)
         }
 
         linuxMain.dependencies {
