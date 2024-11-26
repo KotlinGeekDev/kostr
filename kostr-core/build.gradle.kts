@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
@@ -9,8 +10,9 @@ val kotlinCryptoVersion = "0.4.0"
 val junitJupiterVersion = "5.10.1"
 
 plugins {
-    `java-library`
+    //`java-library`
     kotlin("multiplatform")
+    id("com.android.library") version "8.5.0"
     kotlin("plugin.serialization")
     `maven-publish`
 }
@@ -19,19 +21,32 @@ plugins {
 kotlin {
     //explicitApi()
     jvmToolchain(17)
+
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
     compilerOptions {
         apiVersion.set(KotlinVersion.KOTLIN_1_8)
         languageVersion.set(KotlinVersion.KOTLIN_1_8)
     }
 
     jvm {
+
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
 
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
             testLogging {
                 events("passed", "skipped", "failed")
             }
+        }
+    }
+
+    androidTarget {
+        publishLibraryVariants("release")
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
         }
     }
 
@@ -95,6 +110,14 @@ kotlin {
             implementation(kotlin("test-annotations-common"))
         }
 
+        val commonJvmMain = create("commonJvmMain") {
+            dependsOn(commonMain.get())
+        }
+
+        val commonJvmTest = create("commonJvmTest") {
+            dependsOn(commonTest.get())
+        }
+
         jvmMain.dependencies {
             //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
             implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
@@ -104,6 +127,15 @@ kotlin {
             implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
             implementation("ch.qos.logback:logback-classic:1.4.14")
         }
+
+        androidMain.get().dependsOn(jvmMain.get())
+        androidMain.dependencies {
+            implementation("androidx.appcompat:appcompat:1.7.0")
+//            testImplementation 'junit:junit:4.13.2'
+//            androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+//            androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+        }
+
 
         jvmTest.dependencies {
             implementation(kotlin("test-junit5"))
@@ -133,6 +165,22 @@ kotlin {
         macosMain.get().dependsOn(appleMain.get())
         iosMain.get().dependsOn(appleMain.get())
 
+    }
+}
+
+android {
+    namespace = "ktnostr.nostr.android"
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 21
+    }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    dependencies {
+        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.1")
     }
 }
 
