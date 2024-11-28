@@ -1,4 +1,4 @@
-package kt.nostr.kostr_android
+package ktnostr.android
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
