@@ -1,6 +1,6 @@
 buildscript {
 
-    val kotlinVersion = "2.0.0"
+    val kotlinVersion = "2.0.20"
 
     dependencies {
         classpath(kotlin("gradle-plugin", version = kotlinVersion))
@@ -19,9 +19,22 @@ plugins {
 
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
+    apply(plugin = "maven-publish")
 
     group = "com.github.KotlinGeekDev"
     version = "1.0-beta-05"
+
+    val javadocJar = tasks.register<Jar>("javadocJar") {
+        archiveClassifier.set("javadoc")
+    }
+
+    extensions.configure<PublishingExtension> {
+        publications.withType<MavenPublication>().configureEach {
+            version = project.version.toString()
+            artifact(javadocJar)
+//                from(components["kotlin"])
+        }
+    }
 
 }
 

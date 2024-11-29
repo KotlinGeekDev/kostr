@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
-val kotlinVersion = "2.0.0"
+val kotlinVersion = "2.0.20"
 val ktorVersion = "3.0.1"
 val kotlinCryptoVersion = "0.4.0"
 
@@ -16,7 +16,7 @@ plugins {
     id("com.android.library")
 
     kotlin("plugin.serialization")
-    `maven-publish`
+//    `maven-publish`
 }
 
 
@@ -47,7 +47,7 @@ kotlin {
 
     androidTarget {
         
-        publishLibraryVariants()
+        publishAllLibraryVariants()
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
@@ -98,7 +98,7 @@ kotlin {
             implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
 
             //Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             //Coroutines
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             //Atomics
@@ -247,25 +247,18 @@ tasks.withType<KotlinNativeCompile>().configureEach {
 }
 
 
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-}
 
-publishing {
-//    publications.withType<MavenPublication>(){
-//        artifact(javadocJar)
+
+//publishing {
+////    publications.withType<MavenPublication>(){
+////        artifact(javadocJar)
+////    }
+//
+//    publications {
+//        project.sourceSets.forEach { sourceSet ->
+//            withType<MavenPublication> {
+//
+//            }
+//        }
 //    }
-
-    publications {
-        project.sourceSets.forEach { sourceSet ->
-            withType<MavenPublication> {
-                groupId = project.parent?.group.toString()
-                artifactId = sourceSet.name
-                version = project.parent?.version.toString()
-                artifact(kotlinArtifacts)
-                artifact(javadocJar)
-                from(components["kotlin"])
-            }
-        }
-    }
-}
+//}
