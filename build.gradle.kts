@@ -11,6 +11,7 @@ buildscript {
 }
 
 plugins {
+    kotlin("multiplatform") version "2.0.20" apply false
     id("com.android.library") version "8.2.2" apply false
     id("org.jetbrains.kotlinx.atomicfu") version "0.25.0"
 
@@ -32,7 +33,6 @@ allprojects {
         publications.withType<MavenPublication>().configureEach {
             version = project.version.toString()
             artifact(javadocJar)
-//                from(components["kotlin"])
         }
     }
 

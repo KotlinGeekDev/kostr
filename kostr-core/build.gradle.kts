@@ -46,7 +46,7 @@ kotlin {
 
 
     androidTarget {
-        
+
         publishAllLibraryVariants()
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
@@ -156,9 +156,6 @@ kotlin {
             dependencies {
                 implementation("androidx.appcompat:appcompat:1.7.0")
                 implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.15.0")
-
-//            androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-//            androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
             }
         }
 
@@ -233,7 +230,6 @@ android {
         androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     }
 
-
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
@@ -245,20 +241,3 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 tasks.withType<KotlinNativeCompile>().configureEach {
     compilerOptions.freeCompilerArgs.add("-opt-in=kotlinx.cinterop.ExperimentalForeignApi")
 }
-
-
-
-
-//publishing {
-////    publications.withType<MavenPublication>(){
-////        artifact(javadocJar)
-////    }
-//
-//    publications {
-//        project.sourceSets.forEach { sourceSet ->
-//            withType<MavenPublication> {
-//
-//            }
-//        }
-//    }
-//}
