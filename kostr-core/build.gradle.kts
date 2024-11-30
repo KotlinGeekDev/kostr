@@ -1,4 +1,7 @@
+
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 
 val kotlinVersion = "2.0.20"
@@ -8,10 +11,12 @@ val kotlinCryptoVersion = "0.4.0"
 val junitJupiterVersion = "5.10.1"
 
 plugins {
-    `java-library`
+    //`java-library`
     kotlin("multiplatform")
+    id("com.android.library")
+
     kotlin("plugin.serialization")
-    `maven-publish`
+//    `maven-publish`
 }
 
 
@@ -19,14 +24,33 @@ kotlin {
     //explicitApi()
     jvmToolchain(17)
 
-    jvm {
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    compilerOptions {
+        apiVersion.set(KotlinVersion.KOTLIN_1_8)
+        languageVersion.set(KotlinVersion.KOTLIN_1_8)
+    }
+
+    jvm("baseJvm") {
+
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
 
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
             testLogging {
                 events("passed", "skipped", "failed")
             }
+        }
+    }
+
+
+    androidTarget {
+
+        publishAllLibraryVariants()
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_1_8)
         }
     }
 
@@ -74,7 +98,7 @@ kotlin {
             implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
 
             //Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
             //Coroutines
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             //Atomics
@@ -90,9 +114,10 @@ kotlin {
             implementation(kotlin("test-annotations-common"))
         }
 
-        jvmMain.dependencies {
-            //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
-            implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
+        val commonJvmMain = create("commonJvmMain") {
+            dependsOn(commonMain.get())
+        }
+        commonJvmMain.dependencies {
             implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 
             implementation("com.squareup.okhttp3:okhttp:4.12.0")
@@ -100,7 +125,10 @@ kotlin {
             implementation("ch.qos.logback:logback-classic:1.4.14")
         }
 
-        jvmTest.dependencies {
+        val commonJvmTest = create("commonJvmTest") {
+            dependsOn(commonTest.get())
+        }
+        commonJvmTest.dependencies {
             implementation(kotlin("test-junit5"))
 
             implementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
@@ -111,24 +139,97 @@ kotlin {
             runtimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion")
         }
 
-        linuxMain.dependencies {
-            implementation("io.ktor:ktor-client-cio:$ktorVersion")
-            //implementation("io.ktor:ktor-client-curl:$ktorVersion")
-            implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:$kotlinCryptoVersion")
+        val baseJvmMain by getting {
+            dependsOn(commonJvmMain)
+
+            dependencies {
+                //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
+                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:0.15.0")
+            }
         }
 
-        linuxTest.dependencies {
+
+
+        val androidMain by getting {
+            dependsOn(commonJvmMain)
+
+            dependencies {
+                implementation("androidx.appcompat:appcompat:1.7.0")
+                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-android:0.15.0")
+            }
+        }
+
+
+        val androidUnitTest by getting {
+            dependsOn(commonJvmTest)
+        }
+        androidUnitTest.dependencies {
 
         }
 
-        appleMain.dependencies {
-            implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-            implementation("dev.whyoleg.cryptography:cryptography-provider-apple:$kotlinCryptoVersion")
+
+        val baseJvmTest by getting {
+            dependsOn(commonJvmTest)
+        }
+
+        linuxMain.configure {
+            dependencies {
+                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                //implementation("io.ktor:ktor-client-curl:$ktorVersion")
+                implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:$kotlinCryptoVersion")
+            }
+        }
+
+        linuxTest.configure {
+            dependencies {
+
+            }
+
+        }
+
+        appleMain.configure {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+                implementation("dev.whyoleg.cryptography:cryptography-provider-apple:$kotlinCryptoVersion")
+            }
         }
         macosMain.get().dependsOn(appleMain.get())
         iosMain.get().dependsOn(appleMain.get())
 
     }
+}
+
+android {
+    namespace = "ktnostr.android"
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 34
+        compileSdk = 34
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            aarMetadata {
+
+            }
+            isMinifyEnabled = false
+        }
+    }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    dependencies {
+        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
+        testImplementation("junit:junit:4.13.2")
+        androidTestImplementation("androidx.test.ext:junit:1.2.1")
+        androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    }
+
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
@@ -139,26 +240,4 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 
 tasks.withType<KotlinNativeCompile>().configureEach {
     compilerOptions.freeCompilerArgs.add("-opt-in=kotlinx.cinterop.ExperimentalForeignApi")
-}
-
-
-val javadocJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("javadoc")
-}
-
-publishing {
-    publications.withType<MavenPublication>(){
-        artifact(javadocJar)
-    }
-//    publications {
-//        project.sourceSets.forEach { sourceSet ->
-//            withType<MavenPublication> {
-//                groupId = project.parent?.group.toString()
-//                artifactId = sourceSet.name
-//                version = project.parent?.version.toString()
-//                artifact(tasks.jar)
-//                //from(components["kotlin"])
-//            }
-//        }
-//    }
 }
