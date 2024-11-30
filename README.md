@@ -1,5 +1,13 @@
 # Kostr
 
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.20-blue?style=flat&logo=kotlin)](https://kotlinlang.org)
+
+![badge-jvm](http://img.shields.io/badge/platform-jvm-DB413D.svg?style=flat)
+![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
+![badge-linux](http://img.shields.io/badge/platform-linux-2D3F6C.svg?style=flat)
+![badge-mac](http://img.shields.io/badge/platform-macos-111111.svg?style=flat)
+![badge-ios](http://img.shields.io/badge/platform-ios-CDCDCD.svg?style=flat)
+
 A Kotlin Multiplatform library for working with Nostr, with support for JVM, Android, Linux, MacOS/iOS.
 
 Note: This is still in development and very incomplete.
@@ -53,12 +61,95 @@ then, in your module's `build.gradle(.kts)`, you need to add:
 // build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.KotlinGeekDev.kostr:kostr-core:v1.0-beta-05")
+    implementation("com.github.KotlinGeekDev.kostr:kostr-core:v1.0-beta-06")
 
 }
 
 ```
+If you're including it in an Android app, you can just add:
+```kotlin
+// app/build.gradle.kts
+dependencies {
+    //...
+    implementation("com.github.KotlinGeekDev.kostr:kostr-core-android:v1.0-beta-06")
 
+}
+```
+
+## Usage
+When publishing an event, or making a subscription/close request to a relay, 
+[`ClientMessage`](kostr-core/src/commonMain/kotlin/ktnostr/nostr/client/ClientMessage.kt) is used to encode the request/event,
+and anything sent by a relay is encoded as a [`RelayMessage`](kostr-core/src/commonMain/kotlin/ktnostr/nostr/relay/RelayMessage.kt).</p>
+Relays can be configured using a `RelayPool`, 
+and actual communication with relays is done with the `NostrService`.</p>
+You can setup the NostrService with/without a custom relay pool as follows:
+```kotlin
+// With a custom relay pool. 
+val requestRelays = RelayPool.fromUrls("wss://relay1", "wss://relay2")
+val clientService = NostrService(
+    relayPool = requestRelays
+)
+
+//Without a custom pool(using the default pool)
+val service = NostrService()
+```
+Note that if you need to do anything custom, such as using read-only relays,
+you will need to setup the list of relays, then use them in the relay pool:
+```kotlin
+val customRelays = listOf(
+    Relay("wss://relay1", readPolicy = true, writePolicy = false), // <-- A relay with custom read/write policy.
+    Relay("wss://relay2"),
+)
+
+val customPool = RelayPool(relays = customRelays)
+```
+### Making a subscription request
+In order to make a subscription request, you need to construct a `RequestMessage`.
+And to do that, you need to pass in a subscriptionId(just a string), and a `NostrFilter`:
+```kotlin
+val postsByFiatjafFilter = NostrFilter.newFilter()
+                    .kinds(listOf(EventKind.TEXT_NOTE.kind)) // <-- Looking for posts. Other kinds can be added
+                    .authors(listOf("3bf0c63fcb93463407af97a5e5ee64fa883d107ef9e558472c4eb9aaaefa459d")) // <-- The profiles for which we want to find the posts(as indicated by .kinds() above)
+                    .limit(20) // <-- Setting a limit is important, to avoid issues with relays
+                    .build()
+
+val myRequest = RequestMessage(
+    subscriptionId = "fiatjaf_posts",
+    filters = listOf(postsByFiatjafFilter)
+)
+```
+Now, you can use the `NostrService` to make the request, either using `request()` or `requestWithResult()`. 
+They are both `suspend` functions, and as such, should be called within the appropriate context.</p>
+**Note**: `requestWithResult` terminates the connection(s) after receiving all the expected messages. This behaviour could be 
+modified in the future.
+
+The `request()` function has a set of callbacks which are used to handle the incoming messages,
+`onRelayMessage: suspend (Relay, RelayMessage)`, as well as callbacks for handling errors, `onRequestError(Relay, Throwable)`.
+An example is given below:
+```kotlin
+// Example coroutine scope
+val appScope = CoroutineScope(Dispatchers.IO)
+//Using request() --
+appScope.launch {
+    clientService.request(
+        myRequest, 
+        onRequestError = { relay, throwable -> handleError(relay, throwable) }
+    ) { relay: Relay, received: RelayMessage ->  // This is a suspend callback, so suspend functions can be used here.
+        useMessage(relay, received)
+    }
+}
+```
+The `requestWithResult()` function returns a list of events(`List<Event>`), no matter the errors that occur
+during its execution. The function however displays the errors using standard output. This may be changed in the future.
+```kotlin
+//Using requestWithResult() ---
+// - Assuming a suspending context:
+val events = clientService.requestWithResult(myRequest)
+// OR, following with the request() example above:
+appScope.launch {
+  val events = clientService.requestWithResult(myRequest)  
+}
+```
 ## License
 
     MIT License
