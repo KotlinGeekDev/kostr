@@ -23,7 +23,7 @@ allprojects {
     apply(plugin = "maven-publish")
 
     group = "com.github.KotlinGeekDev"
-    version = "1.0-beta-05"
+    version = "1.0-beta-06"
 
     val javadocJar = tasks.register<Jar>("javadocJar") {
         archiveClassifier.set("javadoc")

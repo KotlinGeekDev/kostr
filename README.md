@@ -61,10 +61,19 @@ then, in your module's `build.gradle(.kts)`, you need to add:
 // build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.KotlinGeekDev.kostr:kostr-core:v1.0-beta-05")
+    implementation("com.github.KotlinGeekDev.kostr:kostr-core:v1.0-beta-06")
 
 }
 
+```
+If you're including it in an Android app, you can just add:
+```kotlin
+// app/build.gradle.kts
+dependencies {
+    //...
+    implementation("com.github.KotlinGeekDev.kostr:kostr-core-android:v1.0-beta-06")
+
+}
 ```
 
 ## Usage
