@@ -19,7 +19,8 @@ import ktnostr.nostr.relay.*
 import kotlin.coroutines.CoroutineContext
 
 
-class NostrService(private val relayPool: RelayPool, override val coroutineContext: CoroutineContext): CoroutineScope {
+class NostrService(private val relayPool: RelayPool = RelayPool()): CoroutineScope {
+    private val serviceDispatcher = Dispatchers.IO.limitedParallelism(relayPool.getRelays().size, name = "NostrServiceDispatcher")
     private val relayEoseCount = atomic(0)
     private val serviceMutex = Mutex()
 
@@ -32,6 +33,9 @@ class NostrService(private val relayPool: RelayPool, override val coroutineConte
 
         }
     }
+
+    override val coroutineContext: CoroutineContext
+        get() = serviceDispatcher
 
 //    suspend fun publishEvent(event: ClientMessage) {
 //        when(event) {
