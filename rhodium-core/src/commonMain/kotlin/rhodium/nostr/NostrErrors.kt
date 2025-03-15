@@ -34,4 +34,6 @@ open class RelayError(override val message: String) : NostrException(message)
 
 class RelayMessageError(override val message: String) : RelayError(message)
 
+class RelayInfoFetchError(override val message: String) : RelayError(message)
+
 
