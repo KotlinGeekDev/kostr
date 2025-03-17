@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 import rhodium.net.httpClient
 import rhodium.nostr.RelayInfoFetchError
 import rhodium.nostr.eventMapper
+import rhodium.nostr.relay.info.RelayLimits
 
 class Relay(
     val relayURI: String,
@@ -43,6 +44,7 @@ class Relay(
         return "Relay(url=$relayURI, read=$readPolicy, write=$writePolicy)"
     }
 
+    //Docs: Write something useful about Relay Info
     @Serializable
     class Info(
         val name: String = "",
@@ -53,6 +55,8 @@ class Relay(
         val contact: String = "",
         @SerialName("supported_nips") val supportedNips: IntArray = emptyArray<Int>().toIntArray(),
         @SerialName("software") val relaySoftware: String = "",
-        @SerialName("version") val softwareVersion: String = ""
+        @SerialName("version") val softwareVersion: String = "",
+        //Extra fields below
+        @SerialName("limitation") val limits: RelayLimits,
     )
 }
