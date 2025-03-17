@@ -18,4 +18,24 @@ class RelayLimits(
     @SerialName("restricted_writes")val writesAreRestricted: Boolean,
     @SerialName("created_at_lower_limit")val creationDateLowerLimit: Long,
     @SerialName("created_at_upper_limit")val creationDateUpperLimit: Long
-)
+) {
+
+    companion object {
+        val DefaultLimits = RelayLimits(
+            maxMessageLength = 0,
+            maxSubscriptions = 0,
+            maxFilters = 0,
+            maxLimit = 0,
+            maxSubscriptionIdLength = 0,
+            maxEventTagNumber = 0,
+            maxContentLength = 0,
+            minPowDifficulty = 0,
+            isAuthRequired = false,
+            isPaymentRequired = false,
+            writesAreRestricted = false,
+            creationDateLowerLimit = 0L,
+            creationDateUpperLimit = Long.MAX_VALUE
+        )
+    }
+}
+

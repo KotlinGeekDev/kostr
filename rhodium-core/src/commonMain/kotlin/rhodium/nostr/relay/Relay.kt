@@ -57,6 +57,6 @@ class Relay(
         @SerialName("software") val relaySoftware: String = "",
         @SerialName("version") val softwareVersion: String = "",
         //Extra fields below
-        @SerialName("limitation") val limits: RelayLimits,
+        @SerialName("limitation") val limits: RelayLimits = RelayLimits.DefaultLimits,
     )
 }
