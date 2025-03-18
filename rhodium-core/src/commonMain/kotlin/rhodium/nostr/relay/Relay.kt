@@ -85,6 +85,12 @@ class Relay(
         //Extra fields below
         @SerialName("limitation") val limits: RelayLimits? = null,
         @SerialName("retention") val retentionPolicies: Array<RetentionPolicy> = emptyArray<RetentionPolicy>(),
+        //Extra field: Content Limitation
         @SerialName("relay_countries") val relayRegionHosts: Array<String>? = null,
+        //Extra field group: Community Preferences
+        //TODO: Extract field group into separate class, and use custom serializer for Info.
+        val allowedLanguages: Array<String>? = null,
+        val allowedTopics: Array<String>? = null,
+        val postingPolicy: String? = null,
     )
 }
