@@ -85,7 +85,7 @@ class Relay(
         @SerialName("version") val softwareVersion: String = "",
         //Extra fields below
         @SerialName("limitation") val limits: RelayLimits? = null,
-        @SerialName("retention") val retentionPolicies: Array<RetentionPolicy> = emptyArray<RetentionPolicy>(),
+        @SerialName("retention") val retentionPolicies: Array<RetentionPolicy>? = null,
         //Extra field: Content Limitation
         @SerialName("relay_countries") val relayRegionHosts: Array<String>? = null,
         //Extra field group: Community Preferences
