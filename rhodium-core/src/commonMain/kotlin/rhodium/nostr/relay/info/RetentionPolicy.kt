@@ -29,8 +29,28 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class RetentionPolicy(
+data class RetentionPolicy(
     @SerialName("kinds") val retainedKinds: IntArray = emptyArray<Int>().toIntArray(),
     @SerialName("time") val retentionTime: Long? = 0L,
     @SerialName("count") val retainedEventCount: Int = 0
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as RetentionPolicy
+
+        if (retentionTime != other.retentionTime) return false
+        if (retainedEventCount != other.retainedEventCount) return false
+        if (!retainedKinds.contentEquals(other.retainedKinds)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = retentionTime?.hashCode() ?: 0
+        result = 31 * result + retainedEventCount
+        result = 31 * result + retainedKinds.contentHashCode()
+        return result
+    }
+}

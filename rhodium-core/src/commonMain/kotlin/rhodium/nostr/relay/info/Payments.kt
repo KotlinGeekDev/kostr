@@ -29,16 +29,58 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Payments(
+data class Payments(
     @SerialName("admission") val admissionFees: Array<PaymentInfo>? = null,
     @SerialName("subscription") val subscriptionFees: Array<PaymentInfo>? = null,
     @SerialName("publication") val publicationFees: Array<PaymentInfo>? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as Payments
+
+        if (!admissionFees.contentEquals(other.admissionFees)) return false
+        if (!subscriptionFees.contentEquals(other.subscriptionFees)) return false
+        if (!publicationFees.contentEquals(other.publicationFees)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = admissionFees?.contentHashCode() ?: 0
+        result = 31 * result + (subscriptionFees?.contentHashCode() ?: 0)
+        result = 31 * result + (publicationFees?.contentHashCode() ?: 0)
+        return result
+    }
+}
 
 @Serializable
-class PaymentInfo(
+data class PaymentInfo(
     val amount: Long,
     val unit: String,
     @SerialName("period") val durationInSeconds: Long? = null,
     @SerialName("kinds") val eventKinds: IntArray? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as PaymentInfo
+
+        if (amount != other.amount) return false
+        if (durationInSeconds != other.durationInSeconds) return false
+        if (unit != other.unit) return false
+        if (!eventKinds.contentEquals(other.eventKinds)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = amount.hashCode()
+        result = 31 * result + (durationInSeconds?.hashCode() ?: 0)
+        result = 31 * result + unit.hashCode()
+        result = 31 * result + (eventKinds?.contentHashCode() ?: 0)
+        return result
+    }
+}
