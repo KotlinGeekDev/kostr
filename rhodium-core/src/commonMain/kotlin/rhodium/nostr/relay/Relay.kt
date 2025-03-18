@@ -49,7 +49,7 @@ class Relay(
         }
 
         suspend fun fetchInfoFor(relayUrl: String, httpClient: HttpClient = httpClient()): Info {
-            val raw = StringBuilder(relayUrl).removePrefix("wss://").removePrefix("ws://")
+            val raw = relayUrl.removePrefix("wss://").removePrefix("ws://")
             val actualUrl = "https://$raw"
             val relayInfoResponse = httpClient.get(actualUrl) {
                 headers.append("Accept", "application/nostr+json")

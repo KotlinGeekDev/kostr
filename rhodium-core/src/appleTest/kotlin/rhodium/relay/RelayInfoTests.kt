@@ -23,9 +23,13 @@
  *
  */
 
-package rhodium.nostr.relay
+package rhodium.relay
 
+import io.ktor.client.HttpClient
+import io.ktor.http.URLBuilder
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import rhodium.nostr.relay.Relay
 import rhodium.nostr.relay.info.PaymentInfo
 import rhodium.nostr.relay.info.Payments
 import rhodium.nostr.relay.info.RelayLimits
@@ -33,6 +37,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class RelayInfoTests {
+
 
     @Test
     fun generatedAndManualRelayInfoAreTheSame() = runTest {
@@ -58,7 +63,7 @@ class RelayInfoTests {
             )
         )
 
-        val obtainedAndParsedInfo = Relay.fetchInfoFor("wss://eden.nostr.land")
+        val obtainedAndParsedInfo = Relay.Companion.fetchInfoFor(URLBuilder("wss://eden.nostr.land").buildString())
 
         assertEquals(edenNostrLandInfo, obtainedAndParsedInfo)
     }
