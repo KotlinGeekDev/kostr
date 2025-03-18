@@ -73,7 +73,7 @@ class Relay(
 
     //Docs: Write something useful about Relay Info
     @Serializable
-    class Info(
+    data class Info(
         val name: String = "",
         val description: String = "",
         val banner: String = "",
@@ -96,5 +96,53 @@ class Relay(
         //Extra field group: Pay-to-Relay
         @SerialName("payments_url") val paymentUrl: String? = null,
         @SerialName("fees") val paymentInfo: Payments? = null
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as Info
+
+            if (name != other.name) return false
+            if (description != other.description) return false
+            if (banner != other.banner) return false
+            if (icon != other.icon) return false
+            if (pubkey != other.pubkey) return false
+            if (contact != other.contact) return false
+            if (!supportedNips.contentEquals(other.supportedNips)) return false
+            if (relaySoftware != other.relaySoftware) return false
+            if (softwareVersion != other.softwareVersion) return false
+            if (limits != other.limits) return false
+            if (!retentionPolicies.contentEquals(other.retentionPolicies)) return false
+            if (!relayRegionHosts.contentEquals(other.relayRegionHosts)) return false
+            if (!allowedLanguages.contentEquals(other.allowedLanguages)) return false
+            if (!allowedTopics.contentEquals(other.allowedTopics)) return false
+            if (postingPolicy != other.postingPolicy) return false
+            if (paymentUrl != other.paymentUrl) return false
+            if (paymentInfo != other.paymentInfo) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = name.hashCode()
+            result = 31 * result + description.hashCode()
+            result = 31 * result + banner.hashCode()
+            result = 31 * result + icon.hashCode()
+            result = 31 * result + pubkey.hashCode()
+            result = 31 * result + contact.hashCode()
+            result = 31 * result + supportedNips.contentHashCode()
+            result = 31 * result + relaySoftware.hashCode()
+            result = 31 * result + softwareVersion.hashCode()
+            result = 31 * result + (limits?.hashCode() ?: 0)
+            result = 31 * result + retentionPolicies.contentHashCode()
+            result = 31 * result + (relayRegionHosts?.contentHashCode() ?: 0)
+            result = 31 * result + (allowedLanguages?.contentHashCode() ?: 0)
+            result = 31 * result + (allowedTopics?.contentHashCode() ?: 0)
+            result = 31 * result + (postingPolicy?.hashCode() ?: 0)
+            result = 31 * result + (paymentUrl?.hashCode() ?: 0)
+            result = 31 * result + (paymentInfo?.hashCode() ?: 0)
+            return result
+        }
+    }
 }
