@@ -34,6 +34,7 @@ import kotlinx.serialization.Serializable
 import rhodium.net.httpClient
 import rhodium.nostr.RelayInfoFetchError
 import rhodium.nostr.eventMapper
+import rhodium.nostr.relay.info.Payments
 import rhodium.nostr.relay.info.RelayLimits
 import rhodium.nostr.relay.info.RetentionPolicy
 
@@ -89,8 +90,11 @@ class Relay(
         @SerialName("relay_countries") val relayRegionHosts: Array<String>? = null,
         //Extra field group: Community Preferences
         //TODO: Extract field group into separate class, and use custom serializer for Info.
-        val allowedLanguages: Array<String>? = null,
-        val allowedTopics: Array<String>? = null,
-        val postingPolicy: String? = null,
+        @SerialName("language_tags") val allowedLanguages: Array<String>? = null,
+        @SerialName("tags") val allowedTopics: Array<String>? = null,
+        @SerialName("posting_policy") val postingPolicy: String? = null,
+        //Extra field group: Pay-to-Relay
+        @SerialName("payments_url") val paymentUrl: String? = null,
+        @SerialName("fees") val paymentInfo: Payments? = null
     )
 }
