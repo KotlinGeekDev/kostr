@@ -26,7 +26,9 @@
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
+import java.io.ByteArrayOutputStream
 
 val coroutinesVersion = "1.10.1"
 val kotlinVersion = "2.1.10"
@@ -277,4 +279,29 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 
 tasks.withType<KotlinNativeCompile>().configureEach {
     compilerOptions.freeCompilerArgs.add("-opt-in=kotlinx.cinterop.ExperimentalForeignApi")
+}
+
+
+val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 16"
+
+tasks.register<Exec>("bootIOSSimulator") {
+    isIgnoreExitValue = true
+    val errorBuffer = ByteArrayOutputStream()
+    errorOutput = ByteArrayOutputStream()
+    commandLine("xcrun", "simctl", "boot", deviceName)
+
+    doLast {
+        val result = executionResult.get()
+        if (result.exitValue != 148 && result.exitValue != 149) { // ignoring device already booted errors
+            println(errorBuffer.toString())
+            result.assertNormalExitValue()
+        }
+    }
+}
+
+tasks.withType<KotlinNativeSimulatorTest>().configureEach {
+    dependsOn("bootIOSSimulator")
+    standalone.set(false)
+    device.set(deviceName)
+
 }
