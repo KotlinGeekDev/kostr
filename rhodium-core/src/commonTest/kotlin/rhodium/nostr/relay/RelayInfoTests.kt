@@ -23,7 +23,7 @@
  *
  */
 
-package rhodium.relay
+package rhodium.nostr.relay
 
 import io.ktor.client.HttpClient
 import io.ktor.http.URLBuilder
@@ -63,7 +63,9 @@ class RelayInfoTests {
             )
         )
 
-        val obtainedAndParsedInfo = Relay.Companion.fetchInfoFor(URLBuilder("wss://eden.nostr.land").buildString())
+        val obtainedAndParsedInfo = Relay.fetchInfoFor("wss://eden.nostr.land")
+        println("Obtained relay info: ")
+        println(obtainedAndParsedInfo)
 
         assertEquals(edenNostrLandInfo, obtainedAndParsedInfo)
     }
