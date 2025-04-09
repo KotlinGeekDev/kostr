@@ -305,3 +305,16 @@ tasks.withType<KotlinNativeSimulatorTest>().configureEach {
     device.set(deviceName)
 
 }
+
+tasks.register<Exec>("shutdownSimulator") {
+
+    val allSimulatorTests = tasks.withType<KotlinNativeSimulatorTest>()
+    if (allSimulatorTests.all { task -> task.state.failure == null }) {
+        commandLine("xcrun", "simctl", "shutdown", "booted")
+    }
+
+}
+
+tasks.named { it.contains("ios") && it.contains("Test") }.configureEach {
+    finalizedBy("shutdownSimulator")
+}
