@@ -25,11 +25,7 @@
 
 package rhodium.nostr.relay
 
-import io.ktor.client.HttpClient
-import io.ktor.http.URLBuilder
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import rhodium.nostr.relay.Relay
 import rhodium.nostr.relay.info.PaymentInfo
 import rhodium.nostr.relay.info.Payments
 import rhodium.nostr.relay.info.RelayLimits
