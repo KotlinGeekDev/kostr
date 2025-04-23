@@ -30,18 +30,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class RelayLimits(
-    @SerialName("max_message_length")val maxMessageLength: Int? = null,
-    @SerialName("max_subscriptions")val maxSubscriptions: Int? = null,
-    @SerialName("max_filters")val maxFilters: Int? = null,
-    @SerialName("max_limit")val maxLimit: Int? = null,
-    @SerialName("max_subid_length")val maxSubscriptionIdLength: Int? = null,
-    @SerialName("max_event_tags")val maxEventTagNumber: Int? = null,
-    @SerialName("max_content_length")val maxContentLength: Int? = null,
-    @SerialName("min_pow_difficulty")val minPowDifficulty: Int? = null,
-    @SerialName("auth_required")val isAuthRequired: Boolean? = null,
-    @SerialName("payment_required")val isPaymentRequired: Boolean? = null,
-    @SerialName("restricted_writes")val writesAreRestricted: Boolean? = null,
-    @SerialName("created_at_lower_limit")val creationDateLowerLimit: Long? = null,
-    @SerialName("created_at_upper_limit")val creationDateUpperLimit: Long? = null
+    @SerialName("max_message_length") val maxMessageLength: Int? = null,
+    @SerialName("max_subscriptions") val maxSubscriptions: Int? = null,
+    @SerialName("max_limit") val maxLimit: Int? = null,
+    @SerialName("max_subid_length") val maxSubscriptionIdLength: Int? = null,
+    @SerialName("max_event_tags") val maxEventTagNumber: Int? = null,
+    @SerialName("max_content_length") val maxContentLength: Int? = null,
+    @SerialName("min_pow_difficulty") val minPowDifficulty: Int? = null,
+    @SerialName("auth_required") val isAuthRequired: Boolean? = null,
+    @SerialName("payment_required") val isPaymentRequired: Boolean? = null,
+    @SerialName("restricted_writes") val writesAreRestricted: Boolean? = null,
+    @SerialName("created_at_lower_limit") val creationDateLowerLimit: Long? = null,
+    @SerialName("created_at_upper_limit") val creationDateUpperLimit: Long? = null,
+    @SerialName("default_limit") val defaultLimit: Int? = null
 )
 
