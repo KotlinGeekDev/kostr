@@ -83,6 +83,8 @@ class Relay(
         @SerialName("supported_nips") val supportedNips: IntArray = emptyArray<Int>().toIntArray(),
         @SerialName("software") val relaySoftware: String = "",
         @SerialName("version") val softwareVersion: String = "",
+        @SerialName("privacy_policy") val privacyPolicy: String = "",
+        @SerialName("terms_of_service") val termsOfService: String = "",
         //Extra fields below
         @SerialName("limitation") val limits: RelayLimits? = null,
         @SerialName("retention") val retentionPolicies: Array<RetentionPolicy>? = null,
