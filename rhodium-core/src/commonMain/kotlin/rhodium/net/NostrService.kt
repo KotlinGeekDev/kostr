@@ -8,7 +8,6 @@ import kotlinx.atomicfu.update
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.encodeToString
 import rhodium.formattedDateTime
 import rhodium.logging.serviceLogger
 import rhodium.nostr.*
@@ -40,22 +39,31 @@ class NostrService(
 //        }
 //    }
 
-    suspend fun sendEvent(message: ClientMessage, onRelayMessage: (Relay, RelayMessage) -> Unit){
+    suspend fun sendEvent(
+        message: ClientMessage,
+        relays: List<Relay> = relayPool.getRelays(),
+        onRelayMessage: (Relay, RelayMessage) -> Unit
+    ){
+        serviceLogger.i("METHOD: -- sendEvent() --")
         val eventJson = eventMapper.encodeToString(message)
-        relayPool.getRelays().forEach {
-            client.webSocket(it.relayURI){
-                send(eventJson)
-                for (frame in incoming){
-                    val messageJson = (frame as Frame.Text).readText()
-                    val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
-                    onRelayMessage(it, decodedMessage)
+        relays.forEach {
+            serviceLogger.d("Sending ClientMessage: $message to the following relays: \n $relays")
+            launch {
+                serviceLogger.i("Websocket Session coroutine for $it")
+                client.webSocket(it.relayURI){
+                    send(eventJson)
+                    for (frame in incoming){
+                        val messageJson = (frame as Frame.Text).readText()
+                        val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
+                        onRelayMessage(it, decodedMessage)
 
+                    }
                 }
             }
         }
     }
 
-    suspend fun request(
+    fun request(
         requestMessage: RequestMessage,
         onRequestError: (Relay, Throwable) -> Unit,
         onRelayMessage: suspend (relay: Relay, received: RelayMessage) -> Unit,
@@ -102,6 +110,7 @@ class NostrService(
         onRelayMessage: suspend (Relay, RelayMessage) -> Unit,
         onRequestError: (Relay, Throwable) -> Unit
     ) {
+        serviceLogger.i("METHOD: -- requestFromRelay() --")
         val requestJson = eventMapper.encodeToString(requestMessage)
 
         launch {
@@ -131,6 +140,7 @@ class NostrService(
         requestMessage: RequestMessage,
         endpoints: List<Relay> = relayPool.getRelays()
     ): List<Event> {
+        serviceLogger.i("METHOD: -- requestWithResult() -- ")
 
         val results = mutableListOf<Event>()
         val relayAuthCache: MutableMap<Relay, RelayAuthMessage> = mutableMapOf()
