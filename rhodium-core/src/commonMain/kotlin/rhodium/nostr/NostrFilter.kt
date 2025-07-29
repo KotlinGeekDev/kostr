@@ -13,6 +13,7 @@ class NostrFilter private constructor(
     @SerialName("#t") private val topicList: List<String>? = null,
     private val since: Long? = null,
     private val until: Long? = null,
+    private val search: String? = null,
     private val limit: Int = 1
 ) {
 
@@ -26,6 +27,7 @@ class NostrFilter private constructor(
           Topic:$topicList
         Since:$since
         Until:$until
+        Search:$search
         Limit:$limit  
     """.trimIndent()
 
@@ -42,6 +44,7 @@ class NostrFilter private constructor(
         private var topicList: List<String>? = null
         private var since: Long? = null
         private var until: Long? = null
+        private var search: String? = null
         private var limit: Int = 1
 
         fun idList(vararg iDList: String = emptyArray()) = apply {
@@ -76,6 +79,10 @@ class NostrFilter private constructor(
             until = timeStamp
         }
 
+        fun search(searchString: String? = null) = apply {
+            search = searchString
+        }
+
         fun limit(receivingEventLimit: Int) = apply {
             limit = receivingEventLimit
         }
@@ -89,6 +96,7 @@ class NostrFilter private constructor(
             topicList = topicList,
             since = since,
             until = until,
+            search = search,
             limit = limit
         )
     }

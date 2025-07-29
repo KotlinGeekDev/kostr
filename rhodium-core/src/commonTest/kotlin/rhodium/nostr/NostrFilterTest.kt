@@ -109,4 +109,21 @@ class NostrFilterTest {
         assertEquals(correctRequestJson, filterJson)
     }
 
+    @Test
+    fun `filter with search parameter serializes correctly`(){
+        val currentTimestamp = 1653822739L
+        val previousTimestamp = currentTimestamp - 24 * 60 * 60
+        val searchFilter = NostrFilter.newFilter()
+            .kinds(EventKind.TEXT_NOTE.kind)
+            .search("bitcoin")
+            .since(previousTimestamp)
+            .until(currentTimestamp)
+            .limit(10)
+            .build()
+        val filterJson = nostrFilterEventMapper.encodeToString(searchFilter)
+        val correctSearchJson = """{"kinds":[1],"since":1653736339,"until":1653822739,"search":"bitcoin","limit":10}"""
+        println("Search filter JSON: $filterJson")
+        assertEquals(correctSearchJson, filterJson)
+    }
+
 }
