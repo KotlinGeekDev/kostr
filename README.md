@@ -115,7 +115,7 @@ val myHttpClient = httpClient {
 val service = NostrService(customClient = myHttpClient)
 ```
 The current limitation is that the HTTP client needs to be Ktor-compatible, that is, you create a 
-custom Ktor engine that uses you client underneath.
+custom Ktor engine that uses your client underneath.
 
 Note that if you need to do anything custom, such as using read-only relays,
 you will need to setup the list of relays, then use them in the relay pool:
@@ -154,13 +154,17 @@ val myRequest = RequestMessage.singleFilterRequest(  // <- singleFilterRequest i
     filter = postsByFiatjafFilter
 )
 ```
+
+**Note**: If you just want to send the request or event JSON directly, you can use `NostrService.sendRaw`. 
+It is a `suspend` function as well. 
+
 Now, you can use the `NostrService` to make the request, either using `request()` or `requestWithResult()`. 
 They are both `suspend` functions, and as such, should be called within the appropriate context.</p>
 **Note**: `requestWithResult` terminates the connection(s) after receiving all the expected messages. This behaviour could be 
 modified in the future.
 
-The `request()` function has a set of callbacks which are used to handle the incoming messages,
-`onRelayMessage: suspend (Relay, RelayMessage)`, as well as callbacks for handling errors, `onRequestError(Relay, Throwable)`.
+The `request()` function has a callback used for handling incoming messages,
+`onRelayMessage: suspend (Relay, RelayMessage)`, as well as a callback for handling errors, `onRequestError(Relay, Throwable)`.
 An example is given below:
 ```kotlin
 // Example coroutine scope
@@ -192,7 +196,7 @@ appScope.launch {
 
     MIT License
     
-    Copyright (c) 2022 KotlinGeekDev
+    Copyright (c) 2025 KotlinGeekDev
     
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
