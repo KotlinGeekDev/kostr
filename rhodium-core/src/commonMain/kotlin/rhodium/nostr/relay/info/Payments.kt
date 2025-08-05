@@ -28,6 +28,18 @@ package rhodium.nostr.relay.info
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents the different payment options given by the relay, provided the relay has paid features.
+ * For more, see [Pay-to-Relay](https://github.com/nostr-protocol/nips/blob/master/11.md#pay-to-relay).
+ * The payment options are divided into 3 nominal categories: admission, subscription, and publication.
+ * Each category has a set of payment choices, each choice represented by a [PaymentInfo] object.
+ *
+ *@see PaymentInfo
+ *
+ * @property admissionFees The payment choices for *admission*(admission tiers), as an array.
+ * @property subscriptionFees The payment choices for *subscription*(subscription tiers), as an array.
+ * @property publicationFees The payment choices for *event publication*(publishing tiers), as an array.
+ */
 @Serializable
 data class Payments(
     @SerialName("admission") val admissionFees: Array<PaymentInfo>? = null,
@@ -55,6 +67,17 @@ data class Payments(
     }
 }
 
+/**
+ * Represents a payment choice, or tier, provided by the relay.
+ *
+ * @see Payments
+ *
+ * @property amount The amount to be paid for this tier.
+ * @property unit The currency(or units of currency) for the amount.
+ * @property durationInSeconds Specifies how long the usage of this tier will last.
+ * @property eventKinds - The event kinds that will be retained,
+ * or allowed for publication if paying for this tier.
+ */
 @Serializable
 data class PaymentInfo(
     val amount: Long,

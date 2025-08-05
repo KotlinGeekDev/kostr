@@ -28,6 +28,19 @@ package rhodium.nostr.relay.info
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents a relay's data retention policies, per NIP-11,
+ *  on [event retention](https://github.com/nostr-protocol/nips/blob/master/11.md#event-retention).
+ *
+ * @property retainedKinds - A set of event kinds specified by the relay.
+ * Events of these kinds are the ones kept by the relay.
+ * @property retentionTime - The amount of time for which a set of events(specified by `retainedKinds` above)
+ * will be kept by the relay, measured in seconds.
+ * A value of zero(`0`) indicates that the relay won't store that event kind, and a `null` value indicates that
+ * the event set will be stored forever.
+ * @property retainedEventCount - The number of events for a particular
+ * kind(or all kinds mentioned in `retainedKinds` above) that will be stored by the relay.
+ */
 @Serializable
 data class RetentionPolicy(
     @SerialName("kinds") val retainedKinds: IntArray = emptyArray<Int>().toIntArray(),
