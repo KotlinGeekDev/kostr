@@ -28,6 +28,27 @@ package rhodium.nostr.relay.info
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents a relay's advertised limits.
+ * For more, see [NIP-11](https://github.com/nostr-protocol/nips/blob/master/11.md).
+ * All properties here are *optional*.
+ *
+ * @property maxMessageLength - The maximum length of the event to be published, in bytes.
+ * @property maxSubscriptions - The maximum number of active subscriptions on a single connection to the relay.
+ * @property maxLimit - The maximum limit for subscription filters sent to this relay.
+ * @property maxSubscriptionIdLength - The maximum length of the subscription id string.
+ * @property maxEventTagNumber - The maximum number of tags allowed in an event published to this relay.
+ * @property maxContentLength - The maximum number of characters in the content field of an event to be published
+ * to this relay.
+ * @property minPowDifficulty - The minimum amount of PoW difficulty needed for an event to be published to this
+ * relay.
+ * @property isAuthRequired - Determines if the relay has placed limits on publishing events/sending requests.
+ * @property creationDateLowerLimit - Determines the 'lowest date', or date furthest back in time,
+ * that an event being published(or request being made) can reach.
+ * @property creationDateUpperLimit - Determines the 'highest date', or date furthest into the future, that
+ * an event being published(or request limit being made) to the relay can reach.
+ * @property defaultLimit - The limit being applied by default, when a request is sent without any limits.
+ */
 @Serializable
 data class RelayLimits(
     @SerialName("max_message_length") val maxMessageLength: Int? = null,
