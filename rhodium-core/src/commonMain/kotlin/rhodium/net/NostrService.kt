@@ -1,14 +1,39 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 KotlinGeekDev
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 package rhodium.net
 
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.websocket.*
+import io.ktor.websocket.send
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.encodeToString
 import rhodium.formattedDateTime
 import rhodium.logging.serviceLogger
 import rhodium.nostr.*
@@ -40,22 +65,41 @@ class NostrService(
 //        }
 //    }
 
-    suspend fun sendEvent(message: ClientMessage, onRelayMessage: (Relay, RelayMessage) -> Unit){
+    suspend fun sendEvent(
+        message: ClientMessage,
+        relays: List<Relay> = relayPool.getRelays(),
+        onRelayMessage: (Relay, RelayMessage) -> Unit
+    ){
+        serviceLogger.i("METHOD: -- sendEvent() --")
         val eventJson = eventMapper.encodeToString(message)
-        relayPool.getRelays().forEach {
-            client.webSocket(it.relayURI){
-                send(eventJson)
-                for (frame in incoming){
-                    val messageJson = (frame as Frame.Text).readText()
-                    val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
-                    onRelayMessage(it, decodedMessage)
+        serviceLogger.d("Sending ClientMessage: $message to the following relays: \n $relays")
+        sendRaw(messageJson = eventJson, relays = relays, onRelayMessage = onRelayMessage)
 
+    }
+
+    suspend fun sendRaw(
+        messageJson: String,
+        relays: List<Relay> = relayPool.getRelays(),
+        onRelayMessage: (Relay, RelayMessage) -> Unit
+    ){
+        serviceLogger.i("METHOD: <-- sendRaw() -->")
+        relays.forEach {
+            launch {
+                serviceLogger.i("Websocket Session coroutine for $it")
+                client.webSocket(it.relayURI){
+                    send(messageJson)
+                    for (frame in incoming){
+                        val messageJson = (frame as Frame.Text).readText()
+                        val decodedMessage = eventMapper.decodeFromString<RelayMessage>(messageJson)
+                        onRelayMessage(it, decodedMessage)
+
+                    }
                 }
             }
         }
     }
 
-    suspend fun request(
+    fun request(
         requestMessage: RequestMessage,
         onRequestError: (Relay, Throwable) -> Unit,
         onRelayMessage: suspend (relay: Relay, received: RelayMessage) -> Unit,
@@ -102,6 +146,7 @@ class NostrService(
         onRelayMessage: suspend (Relay, RelayMessage) -> Unit,
         onRequestError: (Relay, Throwable) -> Unit
     ) {
+        serviceLogger.i("METHOD: -- requestFromRelay() --")
         val requestJson = eventMapper.encodeToString(requestMessage)
 
         launch {
@@ -131,6 +176,7 @@ class NostrService(
         requestMessage: RequestMessage,
         endpoints: List<Relay> = relayPool.getRelays()
     ): List<Event> {
+        serviceLogger.i("METHOD: -- requestWithResult() -- ")
 
         val results = mutableListOf<Event>()
         val relayAuthCache: MutableMap<Relay, RelayAuthMessage> = mutableMapOf()

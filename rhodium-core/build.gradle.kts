@@ -1,13 +1,40 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 KotlinGeekDev
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
 
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
+import java.io.ByteArrayOutputStream
 
-val kotlinVersion = "2.0.20"
-val ktorVersion = "2.3.13"
+val coroutinesVersion = "1.10.1"
+val kotlinVersion = "2.1.10"
+val ktorVersion = "3.1.1"
 val kotlinCryptoVersion = "0.4.0"
-val secp256k1Version = "0.16.0"
+val secp256k1Version = "0.17.1"
 val junitJupiterVersion = "5.10.1"
 
 plugins {
@@ -42,11 +69,11 @@ kotlin {
     //explicitApi()
     jvmToolchain(17)
 
-    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-    compilerOptions {
-        apiVersion.set(KotlinVersion.KOTLIN_1_8)
-        languageVersion.set(KotlinVersion.KOTLIN_1_8)
-    }
+//    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+//    compilerOptions {
+//        apiVersion.set(KotlinVersion.KOTLIN_2_0)
+//        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+//    }
 
     jvm("commonJvm") {
 
@@ -85,6 +112,9 @@ kotlin {
 //        binaries {
 //            sharedLib {
 //
+//            }
+//            executable {
+//                entryPoint = "main"
 //            }
 //        }
     }
@@ -130,11 +160,11 @@ kotlin {
             implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
 
             //Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
             //Coroutines
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
             //Atomics
-            implementation("org.jetbrains.kotlinx:atomicfu:0.26.1")
+            implementation("org.jetbrains.kotlinx:atomicfu:0.27.0")
             //Date-time
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
             //UUID
@@ -148,6 +178,7 @@ kotlin {
         commonTest.dependencies {
             implementation(kotlin("test-common"))
             implementation(kotlin("test-annotations-common"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
         }
 
         val commonJvmMain by getting {
@@ -207,8 +238,8 @@ kotlin {
 
         linuxMain.configure {
             dependencies {
-                implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                //implementation("io.ktor:ktor-client-curl:$ktorVersion")
+//                implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
                 implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:$kotlinCryptoVersion")
             }
         }
@@ -248,4 +279,42 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
 
 tasks.withType<KotlinNativeCompile>().configureEach {
     compilerOptions.freeCompilerArgs.add("-opt-in=kotlinx.cinterop.ExperimentalForeignApi")
+}
+
+
+val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 16"
+
+tasks.register<Exec>("bootIOSSimulator") {
+    isIgnoreExitValue = true
+    val errorBuffer = ByteArrayOutputStream()
+    errorOutput = ByteArrayOutputStream()
+    commandLine("xcrun", "simctl", "boot", deviceName)
+
+    doLast {
+        val result = executionResult.get()
+        if (result.exitValue != 148 && result.exitValue != 149) { // ignoring device already booted errors
+            println(errorBuffer.toString())
+            result.assertNormalExitValue()
+        }
+    }
+}
+
+tasks.withType<KotlinNativeSimulatorTest>().configureEach {
+    dependsOn("bootIOSSimulator")
+    standalone.set(false)
+    device.set(deviceName)
+
+}
+
+tasks.register<Exec>("shutdownSimulator") {
+
+    val allSimulatorTests = tasks.withType<KotlinNativeSimulatorTest>()
+    if (allSimulatorTests.all { task -> task.state.failure == null }) {
+        commandLine("xcrun", "simctl", "shutdown", "booted")
+    }
+
+}
+
+tasks.named { it.contains("ios") && it.contains("Test") }.configureEach {
+    finalizedBy("shutdownSimulator")
 }

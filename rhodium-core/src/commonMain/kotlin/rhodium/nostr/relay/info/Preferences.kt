@@ -23,14 +23,9 @@
  *
  */
 
-package rhodium.net
+package rhodium.nostr.relay.info
 
-import io.ktor.client.*
-import io.ktor.client.engine.curl.Curl
+import kotlinx.serialization.Serializable
 
-internal actual fun httpClient(config: HttpClientConfig<*>.() -> Unit) = HttpClient(Curl) {
-    config(this)
-    engine {
-
-    }
-}
+@Serializable()
+class Preferences

@@ -1,7 +1,7 @@
 # Rhodium
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.20-blue?style=flat&logo=kotlin)](https://kotlinlang.org)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.kotlingeekdev/ballast?color=blue)](https://search.maven.org/search?q=g:io.github.kotlingeekdev)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.kotlingeekdev/rhodium?color=blue)](https://search.maven.org/search?q=g:io.github.kotlingeekdev)
 
 ![badge-jvm](http://img.shields.io/badge/platform-jvm-DB413D.svg?style=flat)
 ![badge-android](http://img.shields.io/badge/platform-android-6EDB8D.svg?style=flat)
@@ -25,7 +25,7 @@ You can include the library from either Maven Central or Jitpack.
 You can include the library in the common source set like this:
 ```kotlin
 dependencies {
-    implementation("io.github.kotlingeekdev:rhodium:1.0-beta-18")
+    implementation("io.github.kotlingeekdev:rhodium:1.0-beta-19")
 
 }
 ```
@@ -74,7 +74,7 @@ then, in your module's `build.gradle(.kts)`, you need to add:
 // build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.KotlinGeekDev.Rhodium:rhodium:1.0-beta-18")
+    implementation("com.github.KotlinGeekDev.Rhodium:rhodium:1.0-beta-19")
 
 
 }
@@ -85,7 +85,7 @@ If you're including it in an Android app, you can just add:
 // app/build.gradle.kts
 dependencies {
     //...
-    implementation("com.github.KotlinGeekDev.Rhodium:rhodium-android:1.0-beta-18")
+    implementation("com.github.KotlinGeekDev.Rhodium:rhodium-android:1.0-beta-19")
 
 }
 ```
@@ -115,7 +115,7 @@ val myHttpClient = httpClient {
 val service = NostrService(customClient = myHttpClient)
 ```
 The current limitation is that the HTTP client needs to be Ktor-compatible, that is, you create a 
-custom Ktor engine that uses you client underneath.
+custom Ktor engine that uses your client underneath.
 
 Note that if you need to do anything custom, such as using read-only relays,
 you will need to setup the list of relays, then use them in the relay pool:
@@ -154,13 +154,17 @@ val myRequest = RequestMessage.singleFilterRequest(  // <- singleFilterRequest i
     filter = postsByFiatjafFilter
 )
 ```
+
+**Note**: If you just want to send the request or event JSON directly, you can use `NostrService.sendRaw`. 
+It is a `suspend` function as well. 
+
 Now, you can use the `NostrService` to make the request, either using `request()` or `requestWithResult()`. 
 They are both `suspend` functions, and as such, should be called within the appropriate context.</p>
 **Note**: `requestWithResult` terminates the connection(s) after receiving all the expected messages. This behaviour could be 
 modified in the future.
 
-The `request()` function has a set of callbacks which are used to handle the incoming messages,
-`onRelayMessage: suspend (Relay, RelayMessage)`, as well as callbacks for handling errors, `onRequestError(Relay, Throwable)`.
+The `request()` function has a callback used for handling incoming messages,
+`onRelayMessage: suspend (Relay, RelayMessage)`, as well as a callback for handling errors, `onRequestError(Relay, Throwable)`.
 An example is given below:
 ```kotlin
 // Example coroutine scope
@@ -192,7 +196,7 @@ appScope.launch {
 
     MIT License
     
-    Copyright (c) 2022 KotlinGeekDev
+    Copyright (c) 2025 KotlinGeekDev
     
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
