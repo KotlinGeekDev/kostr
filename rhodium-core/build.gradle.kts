@@ -24,22 +24,17 @@
  */
 
 
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 import java.io.ByteArrayOutputStream
 
-val coroutinesVersion = "1.10.1"
-val kotlinVersion = "2.1.10"
-val ktorVersion = "3.1.1"
-val kotlinCryptoVersion = "0.4.0"
-val secp256k1Version = "0.17.1"
-val junitJupiterVersion = "5.10.1"
-
 plugins {
-    kotlin("multiplatform")
-    id("com.android.library")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.vanniktech.maven.publish)
 }
 
 android {
@@ -137,64 +132,63 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             //Ktor
-            implementation("io.ktor:ktor-client-core:$ktorVersion")
-            implementation("io.ktor:ktor-client-websockets:$ktorVersion")
-            implementation("io.ktor:ktor-client-logging:$ktorVersion")
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.websockets)
+            implementation(libs.ktor.client.logging)
 
             //Kotlin base
-            implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
-            implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+            implementation(libs.kotlin.stdlib)
+            implementation(libs.kotlin.reflect)
 
             //Crypto(Secp256k1-utils, SecureRandom, Hashing, etc.)
-            implementation("fr.acinq.secp256k1:secp256k1-kmp:$secp256k1Version")
-            implementation("dev.whyoleg.cryptography:cryptography-core:$kotlinCryptoVersion")
-            implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
+            implementation(libs.secp256k1.kmp)
+            implementation(libs.whyoleg.cryptography.core)
+            implementation(libs.whyoleg.cryptography.random)
 
             //Serialization
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+            implementation(libs.kotlinx.serialization.json)
             //Coroutines
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+            implementation(libs.kotlinx.coroutines.core)
             //Atomics
-            implementation("org.jetbrains.kotlinx:atomicfu:0.27.0")
+            implementation(libs.atomicfu)
             //Date-time
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
+            implementation(libs.kotlinx.datetime)
             //UUID
-            implementation("com.benasher44:uuid:0.8.4")
+            implementation(libs.benasher.uuid)
             //ByteBuffer(until a kotlinx-io replacement appears)
-            implementation("com.ditchoom:buffer:1.4.2")
+            implementation(libs.kmp.bytebuffer)
             //Logging
-            implementation("co.touchlab:kermit:2.0.5")
+            implementation(libs.kermit)
         }
 
         commonTest.dependencies {
-            implementation(kotlin("test-common"))
-            implementation(kotlin("test-annotations-common"))
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
+            implementation(libs.kotlin.test.common)
+            implementation(libs.kotlin.test.annotations.common)
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         val commonJvmMain by getting {
 
             dependencies {
-                implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
+                implementation(libs.whyoleg.cryptography.provider.jdk)
 
-                implementation("com.squareup.okhttp3:okhttp:4.12.0")
-                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
-                //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
-                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:$secp256k1Version")
+                implementation(libs.okhttp)
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.secp256k1.kmp.jni.jvm)
             }
         }
 
         val commonJvmTest by getting {
 
             dependencies {
-                implementation(kotlin("test-junit5"))
+                implementation(libs.kotlin.test.junit5)
 
-                implementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-                implementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
-                implementation("org.assertj:assertj-core:3.23.1")
-                runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:$secp256k1Version")
-                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
-                runtimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion")
+                implementation(libs.junit.jupiter)
+                implementation(libs.junit.jupiter.params)
+                implementation(libs.assertj.core)
+                runtimeOnly(libs.secp256k1.kmp.jni.jvm.linux)
+                runtimeOnly(libs.junit.jupiter.engine)
+                runtimeOnly(libs.junit.vintage.engine)
             }
         }
 
@@ -203,35 +197,35 @@ kotlin {
         androidMain.configure {
 
             dependencies {
-                implementation("androidx.appcompat:appcompat:1.7.0")
+                implementation(libs.appcompat)
                 //        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
-                implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
-                implementation("com.squareup.okhttp3:okhttp:4.12.0")
-                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
-                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-android:$secp256k1Version")
+                implementation(libs.whyoleg.cryptography.provider.jdk)
+                implementation(libs.okhttp)
+                implementation(libs.ktor.client.okhttp)
+                implementation(libs.secp256k1.kmp.jni.android)
             }
         }
 
         androidUnitTest.configure {
             dependsOn(commonJvmTest)
             dependencies {
-                implementation("junit:junit:4.13.2")
+                implementation(libs.junit)
             }
         }
 
         androidInstrumentedTest.configure {
             dependsOn(commonJvmTest)
             dependencies {
-                implementation("androidx.test.ext:junit:1.2.1")
-                implementation("androidx.test.espresso:espresso-core:3.6.1")
+                implementation(libs.ext.junit)
+                implementation(libs.espresso.core)
             }
         }
 
         linuxMain.configure {
             dependencies {
 //                implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                implementation("io.ktor:ktor-client-curl:$ktorVersion")
-                implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:$kotlinCryptoVersion")
+                implementation(libs.ktor.client.curl)
+                implementation(libs.whyoleg.cryptography.provider.openssl3.prebuilt)
             }
         }
 
@@ -245,8 +239,8 @@ kotlin {
         appleMain.configure {
             dependsOn(commonMain.get())
             dependencies {
-                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
-                implementation("dev.whyoleg.cryptography:cryptography-provider-apple:$kotlinCryptoVersion")
+                implementation(libs.ktor.client.darwin)
+                implementation(libs.whyoleg.cryptography.provider.apple)
             }
         }
         appleTest.configure {
@@ -308,4 +302,49 @@ tasks.register<Exec>("shutdownSimulator") {
 
 tasks.named { it.contains("ios") && it.contains("Test") }.configureEach {
     finalizedBy("shutdownSimulator")
+}
+
+mavenPublishing {
+    val isJitpack = System.getenv("JITPACK") == "true"
+
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+    if (!isJitpack){
+        signAllPublications()
+    }
+
+
+    coordinates(group.toString(), "rhodium", version.toString())
+
+//        configure(KotlinMultiplatform(
+//            javadocJar = JavadocJar.Javadoc(),
+//            sourcesJar = true
+//        ))
+
+    pom {
+        name = "Rhodium"
+        description = " A Kotlin Multiplatform library for Nostr"
+        url = "https://github.com/KotlinGeekDev/Rhodium"
+
+        licenses {
+            license {
+                name = "The MIT License"
+                url = "https://opensource.org/license/MIT"
+                distribution = "https://opensource.org/license/MIT"
+            }
+        }
+
+        developers {
+            developer {
+                name = "KotlinGeekDev"
+                email = "kotlingeek@protonmail.com"
+                url = "https://github.com/KotlinGeekDev"
+            }
+        }
+
+        scm {
+            connection = "scm:git:git://github.com/KotlinGeekDev/Rhodium.git"
+            url = "https://github.com/KotlinGeekDev/Rhodium"
+
+        }
+    }
 }
