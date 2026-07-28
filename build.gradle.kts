@@ -42,8 +42,6 @@ plugins {
     id("com.android.library") version "8.7.3" apply false
     id("org.jetbrains.kotlinx.atomicfu") version "0.27.0"
     id("com.vanniktech.maven.publish") version "0.30.0"
-    //id("org.jetbrains.kotlin.android") version "2.0.0" apply false
-    //id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" apply false
 
 }
 
@@ -51,17 +49,11 @@ plugins {
 allprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
     apply(plugin = "com.vanniktech.maven.publish")
-//    apply(plugin = "maven-publish")
 
     val isJitpack = System.getenv("JITPACK") == "true"
 
     group = "io.github.kotlingeekdev"
     version = "1.0-beta-19"
-
-
-//    val javadocJar = tasks.register<Jar>("javadocJar") {
-//        archiveClassifier.set("javadoc")
-//    }
 
     mavenPublishing {
         publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
@@ -105,14 +97,6 @@ allprojects {
             }
         }
     }
-
-//    extensions.configure<PublishingExtension> {
-//        publications.withType<MavenPublication>().configureEach {
-//            version = project.version.toString()
-//            artifact(javadocJar)
-//        }
-//    }
-
 }
 
 
