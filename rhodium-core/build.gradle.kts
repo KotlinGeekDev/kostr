@@ -24,7 +24,6 @@
  */
 
 
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
@@ -69,15 +68,8 @@ kotlin {
     //explicitApi()
     jvmToolchain(17)
 
-//    @OptIn(ExperimentalKotlinGradlePluginApi::class)
-//    compilerOptions {
-//        apiVersion.set(KotlinVersion.KOTLIN_2_0)
-//        languageVersion.set(KotlinVersion.KOTLIN_2_0)
-//    }
-
     jvm("commonJvm") {
 
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 
 
@@ -93,7 +85,6 @@ kotlin {
     androidTarget() {
 
         publishAllLibraryVariants()
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_1_8)
         }
