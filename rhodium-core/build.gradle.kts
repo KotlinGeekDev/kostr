@@ -267,7 +267,7 @@ tasks.withType<KotlinNativeCompile>().configureEach {
 }
 
 
-val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 16"
+val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 17"
 
 tasks.register<Exec>("bootIOSSimulator") {
     isIgnoreExitValue = true
