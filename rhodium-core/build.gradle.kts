@@ -28,6 +28,8 @@ import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -253,6 +255,7 @@ val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 17"
 tasks.register<Exec>("bootIOSSimulator") {
     onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX }
     isIgnoreExitValue = true
+    errorOutput = ByteArrayOutputStream()
     commandLine("xcrun", "simctl", "boot", deviceName)
 
     doLast {
