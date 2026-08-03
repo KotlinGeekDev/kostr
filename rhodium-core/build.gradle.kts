@@ -28,36 +28,13 @@ import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
-import java.io.ByteArrayOutputStream
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kmp.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.vanniktech.maven.publish)
 }
-
-android {
-    namespace = "io.github.kotlingeekdev.rhodium.android"
-    compileSdk = 34
-    defaultConfig {
-        minSdk = 21
-        targetSdk = 34
-        compileSdk = 34
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-    compileOptions {
-        isCoreLibraryDesugaringEnabled = false
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-}
-
 
 kotlin {
     //explicitApi()
@@ -76,13 +53,24 @@ kotlin {
         }
     }
 
+    android {
+        namespace = "io.github.kotlingeekdev.rhodium.android"
+        compileSdk = 36
+        minSdk = 21
+        enableCoreLibraryDesugaring = false
 
-    androidTarget() {
-
-        publishAllLibraryVariants()
+        withJava()
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_1_8)
+           jvmTarget.set(JvmTarget.JVM_1_8)
         }
+        optimization {
+            keepRules.files.add(project.file("proguard-rules.pro"))
+            consumerKeepRules.files.add(project.file("consumer-rules.pro"))
+
+        }
+
+
+
     }
 
 
@@ -174,7 +162,6 @@ kotlin {
 
                 implementation(libs.okhttp)
                 implementation(libs.ktor.client.okhttp)
-                implementation(libs.secp256k1.kmp.jni.jvm)
             }
         }
 
@@ -237,19 +224,10 @@ kotlin {
         }
 
         appleMain.configure {
-            dependsOn(commonMain.get())
             dependencies {
                 implementation(libs.ktor.client.darwin)
                 implementation(libs.whyoleg.cryptography.provider.apple)
             }
-        }
-        appleTest.configure {
-            dependsOn(commonTest.get())
-        }
-
-        appleTargets.forEach { target ->
-            getByName("${target.targetName}Main") { dependsOn(appleMain.get()) }
-            getByName("${target.targetName}Test") { dependsOn(appleTest.get()) }
         }
 
     }
@@ -271,14 +249,12 @@ val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 17"
 
 tasks.register<Exec>("bootIOSSimulator") {
     isIgnoreExitValue = true
-    val errorBuffer = ByteArrayOutputStream()
-    errorOutput = ByteArrayOutputStream()
     commandLine("xcrun", "simctl", "boot", deviceName)
 
     doLast {
         val result = executionResult.get()
         if (result.exitValue != 148 && result.exitValue != 149) { // ignoring device already booted errors
-            println(errorBuffer.toString())
+            println(errorOutput.toString())
             result.assertNormalExitValue()
         }
     }
