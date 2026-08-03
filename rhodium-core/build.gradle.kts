@@ -68,7 +68,10 @@ kotlin {
             consumerKeepRules.files.add(project.file("consumer-rules.pro"))
 
         }
-
+        withHostTestBuilder {  }.configure {  }
+        withDeviceTestBuilder {
+//            sourceSetTreeName = "test"
+        }
 
 
     }
@@ -193,14 +196,14 @@ kotlin {
             }
         }
 
-        androidUnitTest.configure {
+        getByName("androidHostTest") {
             dependsOn(commonJvmTest)
             dependencies {
                 implementation(libs.junit)
             }
         }
 
-        androidInstrumentedTest.configure {
+        getByName("androidDeviceTest") {
             dependsOn(commonJvmTest)
             dependencies {
                 implementation(libs.ext.junit)
