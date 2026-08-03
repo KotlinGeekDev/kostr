@@ -248,6 +248,7 @@ tasks.withType<KotlinNativeCompile>().configureEach {
 val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 17"
 
 tasks.register<Exec>("bootIOSSimulator") {
+    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX }
     isIgnoreExitValue = true
     commandLine("xcrun", "simctl", "boot", deviceName)
 
@@ -268,7 +269,7 @@ tasks.withType<KotlinNativeSimulatorTest>().configureEach {
 }
 
 tasks.register<Exec>("shutdownSimulator") {
-
+    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX }
     val allSimulatorTests = tasks.withType<KotlinNativeSimulatorTest>()
     if (allSimulatorTests.all { task -> task.state.failure == null }) {
         commandLine("xcrun", "simctl", "shutdown", "booted")
