@@ -15,10 +15,14 @@ import kotlinx.serialization.json.*
 /**
  * The model that represents the data sent from a relay.
  * It is a base class for all specific relay message types.
- * Currently, there are two types of relay messages, represented by the tags EVENT and NOTICE.
- * You can see their corresponding representations, RelayEventMessage and RelayNotice.
+ * Currently, there are six supported types of relay messages.
+ * You can see their corresponding representations in this file.
  * @see RelayEventMessage
  * @see RelayNotice
+ * @see RelayAuthMessage
+ * @see CountResponse
+ * @see EventStatus
+ * @see CloseMessage
  */
 @Serializable(with = RelayMessage.RelayMessageSerializer::class)
 sealed class RelayMessage(){
