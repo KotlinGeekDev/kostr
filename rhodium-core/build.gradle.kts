@@ -24,26 +24,60 @@
  */
 
 
-import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
 import org.jetbrains.kotlin.gradle.tasks.KotlinNativeCompile
 import java.io.ByteArrayOutputStream
-import java.io.OutputStream
+
+val coroutinesVersion = "1.10.1"
+val kotlinVersion = "2.1.10"
+val ktorVersion = "3.1.1"
+val kotlinCryptoVersion = "0.4.0"
+val secp256k1Version = "0.17.1"
+val junitJupiterVersion = "5.10.1"
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.kmp.library)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.vanniktech.maven.publish)
+    kotlin("multiplatform")
+    id("com.android.library")
+    kotlin("plugin.serialization")
 }
+
+android {
+    namespace = "io.github.kotlingeekdev.rhodium.android"
+    compileSdk = 34
+    defaultConfig {
+        minSdk = 21
+        targetSdk = 34
+        compileSdk = 34
+
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
+    }
+    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = false
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+}
+
 
 kotlin {
     //explicitApi()
     jvmToolchain(17)
 
+//    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+//    compilerOptions {
+//        apiVersion.set(KotlinVersion.KOTLIN_2_0)
+//        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+//    }
+
     jvm("commonJvm") {
 
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
 
 
@@ -55,27 +89,14 @@ kotlin {
         }
     }
 
-    android {
-        namespace = "io.github.kotlingeekdev.rhodium.android"
-        compileSdk = 36
-        minSdk = 21
-        enableCoreLibraryDesugaring = false
 
-        withJava()
+    androidTarget() {
+
+        publishAllLibraryVariants()
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-           jvmTarget.set(JvmTarget.JVM_1_8)
+            jvmTarget.set(JvmTarget.JVM_1_8)
         }
-        optimization {
-            keepRules.files.add(project.file("proguard-rules.pro"))
-            consumerKeepRules.files.add(project.file("consumer-rules.pro"))
-
-        }
-        withHostTestBuilder {  }.configure {  }
-        withDeviceTestBuilder {
-//            sourceSetTreeName = "test"
-        }
-
-
     }
 
 
@@ -125,62 +146,64 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             //Ktor
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.websockets)
-            implementation(libs.ktor.client.logging)
+            implementation("io.ktor:ktor-client-core:$ktorVersion")
+            implementation("io.ktor:ktor-client-websockets:$ktorVersion")
+            implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
             //Kotlin base
-            implementation(libs.kotlin.stdlib)
-            implementation(libs.kotlin.reflect)
+            implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+            implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
 
             //Crypto(Secp256k1-utils, SecureRandom, Hashing, etc.)
-            implementation(libs.secp256k1.kmp)
-            implementation(libs.whyoleg.cryptography.core)
-            implementation(libs.whyoleg.cryptography.random)
+            implementation("fr.acinq.secp256k1:secp256k1-kmp:$secp256k1Version")
+            implementation("dev.whyoleg.cryptography:cryptography-core:$kotlinCryptoVersion")
+            implementation("dev.whyoleg.cryptography:cryptography-random:$kotlinCryptoVersion")
 
             //Serialization
-            implementation(libs.kotlinx.serialization.json)
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
             //Coroutines
-            implementation(libs.kotlinx.coroutines.core)
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
             //Atomics
-            implementation(libs.atomicfu)
+            implementation("org.jetbrains.kotlinx:atomicfu:0.27.0")
             //Date-time
-            implementation(libs.kotlinx.datetime)
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")
             //UUID
-            implementation(libs.benasher.uuid)
+            implementation("com.benasher44:uuid:0.8.4")
             //ByteBuffer(until a kotlinx-io replacement appears)
-            implementation(libs.kmp.bytebuffer)
+            implementation("com.ditchoom:buffer:1.4.2")
             //Logging
-            implementation(libs.kermit)
+            implementation("co.touchlab:kermit:2.0.5")
         }
 
         commonTest.dependencies {
-            implementation(libs.kotlin.test.common)
-            implementation(libs.kotlin.test.annotations.common)
-            implementation(libs.kotlinx.coroutines.test)
+            implementation(kotlin("test-common"))
+            implementation(kotlin("test-annotations-common"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
         }
 
         val commonJvmMain by getting {
 
             dependencies {
-                implementation(libs.whyoleg.cryptography.provider.jdk)
+                implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
 
-                implementation(libs.okhttp)
-                implementation(libs.ktor.client.okhttp)
+                implementation("com.squareup.okhttp3:okhttp:4.12.0")
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+                //implementation("fr.acinq.secp256k1:secp256k1-kmp-jvm:0.6.4")
+                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm:$secp256k1Version")
             }
         }
 
         val commonJvmTest by getting {
 
             dependencies {
-                implementation(libs.kotlin.test.junit5)
+                implementation(kotlin("test-junit5"))
 
-                implementation(libs.junit.jupiter)
-                implementation(libs.junit.jupiter.params)
-                implementation(libs.assertj.core)
-                runtimeOnly(libs.secp256k1.kmp.jni.jvm.linux)
-                runtimeOnly(libs.junit.jupiter.engine)
-                runtimeOnly(libs.junit.vintage.engine)
+                implementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+                implementation("org.junit.jupiter:junit-jupiter-params:$junitJupiterVersion")
+                implementation("org.assertj:assertj-core:3.23.1")
+                runtimeOnly("fr.acinq.secp256k1:secp256k1-kmp-jni-jvm-linux:$secp256k1Version")
+                runtimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+                runtimeOnly("org.junit.vintage:junit-vintage-engine:$junitJupiterVersion")
             }
         }
 
@@ -189,35 +212,35 @@ kotlin {
         androidMain.configure {
 
             dependencies {
-                implementation(libs.appcompat)
+                implementation("androidx.appcompat:appcompat:1.7.0")
                 //        coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")
-                implementation(libs.whyoleg.cryptography.provider.jdk)
-                implementation(libs.okhttp)
-                implementation(libs.ktor.client.okhttp)
-                implementation(libs.secp256k1.kmp.jni.android)
+                implementation("dev.whyoleg.cryptography:cryptography-provider-jdk:$kotlinCryptoVersion")
+                implementation("com.squareup.okhttp3:okhttp:4.12.0")
+                implementation("io.ktor:ktor-client-okhttp:$ktorVersion")
+                implementation("fr.acinq.secp256k1:secp256k1-kmp-jni-android:$secp256k1Version")
             }
         }
 
-        getByName("androidHostTest") {
+        androidUnitTest.configure {
             dependsOn(commonJvmTest)
             dependencies {
-                implementation(libs.junit)
+                implementation("junit:junit:4.13.2")
             }
         }
 
-        getByName("androidDeviceTest") {
+        androidInstrumentedTest.configure {
             dependsOn(commonJvmTest)
             dependencies {
-                implementation(libs.ext.junit)
-                implementation(libs.espresso.core)
+                implementation("androidx.test.ext:junit:1.2.1")
+                implementation("androidx.test.espresso:espresso-core:3.6.1")
             }
         }
 
         linuxMain.configure {
             dependencies {
 //                implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                implementation(libs.ktor.client.curl)
-                implementation(libs.whyoleg.cryptography.provider.openssl3.prebuilt)
+                implementation("io.ktor:ktor-client-curl:$ktorVersion")
+                implementation("dev.whyoleg.cryptography:cryptography-provider-openssl3-prebuilt:$kotlinCryptoVersion")
             }
         }
 
@@ -229,10 +252,19 @@ kotlin {
         }
 
         appleMain.configure {
+            dependsOn(commonMain.get())
             dependencies {
-                implementation(libs.ktor.client.darwin)
-                implementation(libs.whyoleg.cryptography.provider.apple)
+                implementation("io.ktor:ktor-client-darwin:$ktorVersion")
+                implementation("dev.whyoleg.cryptography:cryptography-provider-apple:$kotlinCryptoVersion")
             }
+        }
+        appleTest.configure {
+            dependsOn(commonTest.get())
+        }
+
+        appleTargets.forEach { target ->
+            getByName("${target.targetName}Main") { dependsOn(appleMain.get()) }
+            getByName("${target.targetName}Test") { dependsOn(appleTest.get()) }
         }
 
     }
@@ -250,18 +282,18 @@ tasks.withType<KotlinNativeCompile>().configureEach {
 }
 
 
-val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 17"
+val deviceName = project.findProperty("iosDevice") as? String ?: "iPhone 16"
 
 tasks.register<Exec>("bootIOSSimulator") {
-    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX }
     isIgnoreExitValue = true
+    val errorBuffer = ByteArrayOutputStream()
     errorOutput = ByteArrayOutputStream()
     commandLine("xcrun", "simctl", "boot", deviceName)
 
     doLast {
         val result = executionResult.get()
         if (result.exitValue != 148 && result.exitValue != 149) { // ignoring device already booted errors
-            println(errorOutput.toString())
+            println(errorBuffer.toString())
             result.assertNormalExitValue()
         }
     }
@@ -275,7 +307,7 @@ tasks.withType<KotlinNativeSimulatorTest>().configureEach {
 }
 
 tasks.register<Exec>("shutdownSimulator") {
-    onlyIf { org.gradle.internal.os.OperatingSystem.current().isMacOsX }
+
     val allSimulatorTests = tasks.withType<KotlinNativeSimulatorTest>()
     if (allSimulatorTests.all { task -> task.state.failure == null }) {
         commandLine("xcrun", "simctl", "shutdown", "booted")
@@ -285,49 +317,4 @@ tasks.register<Exec>("shutdownSimulator") {
 
 tasks.named { it.contains("ios") && it.contains("Test") }.configureEach {
     finalizedBy("shutdownSimulator")
-}
-
-mavenPublishing {
-    val isJitpack = System.getenv("JITPACK") == "true"
-
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-    if (!isJitpack){
-        signAllPublications()
-    }
-
-
-    coordinates(group.toString(), "rhodium", version.toString())
-
-//        configure(KotlinMultiplatform(
-//            javadocJar = JavadocJar.Javadoc(),
-//            sourcesJar = true
-//        ))
-
-    pom {
-        name = "Rhodium"
-        description = " A Kotlin Multiplatform library for Nostr"
-        url = "https://github.com/KotlinGeekDev/Rhodium"
-
-        licenses {
-            license {
-                name = "The MIT License"
-                url = "https://opensource.org/license/MIT"
-                distribution = "https://opensource.org/license/MIT"
-            }
-        }
-
-        developers {
-            developer {
-                name = "KotlinGeekDev"
-                email = "kotlingeek@protonmail.com"
-                url = "https://github.com/KotlinGeekDev"
-            }
-        }
-
-        scm {
-            connection = "scm:git:git://github.com/KotlinGeekDev/Rhodium.git"
-            url = "https://github.com/KotlinGeekDev/Rhodium"
-
-        }
-    }
 }
