@@ -1,7 +1,5 @@
-/*
- * MIT License
- *
- * Copyright (c) 2025 KotlinGeekDev
+/**
+ * Copyright (c) 2022 KotlinGeekDev
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,9 +44,9 @@ package rhodium.crypto.tlv
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-import com.ditchoom.buffer.BufferFactory
 import com.ditchoom.buffer.ByteOrder
-import com.ditchoom.buffer.Default
+import com.ditchoom.buffer.PlatformBuffer
+import com.ditchoom.buffer.wrap
 import kotlinx.io.bytestring.ByteString
 import kotlinx.io.bytestring.decodeToString
 import rhodium.crypto.toHexString
@@ -94,5 +92,5 @@ class Tlv(
 fun ByteArray.toInt32(): Int? {
     if (size != 4) return null
 
-    return BufferFactory.Default.wrap(this.copyOfRange(0, 4), ByteOrder.BIG_ENDIAN).readInt()
+    return PlatformBuffer.wrap(this.copyOfRange(0, 4), ByteOrder.BIG_ENDIAN).readInt()
 }

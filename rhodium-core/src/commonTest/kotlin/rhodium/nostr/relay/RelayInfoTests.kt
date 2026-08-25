@@ -38,15 +38,14 @@ class RelayInfoTests {
     @Test
     fun generatedAndManualRelayInfoAreTheSame() = runTest {
         val edenNostrLandInfo = Relay.Info(
-            description = "✨ the leading Nostr relay powered by NFDB\n\uD83C\uDF10 connected to fi-transitory-01",
-            name = "✨ nostr.land",
-            contact = "",
-            icon = "https://i.nostr.build/j6xguiCQRrdk6MsL.jpg",
+            description = "[✨ NFDB] nostr.land family of relays (fi-01 [tiger])",
+            name = "[✨ NFDB] nostr.land",
+            icon = "https://i.nostr.build/b3thno790aodH8lE.jpg",
             pubkey = "52b4a076bcbbbdc3a1aefa3735816cf74993b1b8db202b01c883c58be7fad8bd",
             relaySoftware = "NFDB",
-            softwareVersion = "2.0 γ5",
+            softwareVersion = "1.0.0",
             termsOfService = "https://nostr.land/terms",
-            supportedNips = intArrayOf(),
+            supportedNips = intArrayOf(1, 2, 4, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 27, 28, 30, 31, 32, 34, 35, 36, 37, 38, 39, 40, 42, 44, 46, 47, 48, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 64, 65, 68, 69, 71, 72, 73, 75, 78, 84, 88, 89, 90, 92, 99),
             limits = RelayLimits(
                 maxMessageLength = 65535,
                 maxEventTagNumber = 2000,
@@ -55,7 +54,11 @@ class RelayInfoTests {
                 isPaymentRequired = true,
             ),
             paymentUrl = "https://nostr.land",
-            paymentInfo = null
+            paymentInfo = Payments(
+                subscriptionFees = arrayOf(
+                    PaymentInfo(amount = 4000000, unit = "msats", durationInSeconds = 2592000)
+                )
+            )
         )
 
         val obtainedAndParsedInfo = Relay.fetchInfoFor("wss://eden.nostr.land")
