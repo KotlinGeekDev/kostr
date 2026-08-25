@@ -24,6 +24,7 @@
  */
 
 
+import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.native.tasks.KotlinNativeSimulatorTest
@@ -292,16 +293,17 @@ mavenPublishing {
 
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     if (!isJitpack){
-        //signAllPublications()
+        signAllPublications()
     }
 
 
     coordinates(rootProject.group.toString(), "rhodium", rootProject.version.toString())
 
-//        configure(KotlinMultiplatform(
-//            javadocJar = JavadocJar.Javadoc(),
-//            sourcesJar = true
-//        ))
+        configure(
+            KotlinMultiplatform(
+                sourcesJar = true
+            )
+        )
 
     pom {
         name = "Rhodium"

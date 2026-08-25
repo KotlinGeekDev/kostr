@@ -41,7 +41,7 @@ plugins {
 
 }
 
-group = "io.github.kotlingeekdev"
+group = "io.github.kotlingeekdev.rhodium"
 version = "1.0-rc"
 
 
