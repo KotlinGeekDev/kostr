@@ -292,11 +292,11 @@ mavenPublishing {
 
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
     if (!isJitpack){
-        signAllPublications()
+        //signAllPublications()
     }
 
 
-    coordinates(group.toString(), "rhodium", version.toString())
+    coordinates(rootProject.group.toString(), "rhodium", rootProject.version.toString())
 
 //        configure(KotlinMultiplatform(
 //            javadocJar = JavadocJar.Javadoc(),
