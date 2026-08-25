@@ -42,6 +42,6 @@ plugins {
 }
 
 group = "io.github.kotlingeekdev"
-version = "1.0-beta-19"
+version = "1.0-rc"
 
 
